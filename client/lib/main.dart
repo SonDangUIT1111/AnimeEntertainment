@@ -2,6 +2,7 @@ import 'package:anime_and_comic_entertainment/pages/anime_home.dart';
 import 'package:anime_and_comic_entertainment/pages/comic_page.dart';
 import 'package:anime_and_comic_entertainment/pages/splash.dart';
 import 'package:anime_and_comic_entertainment/utils/apiKey.dart';
+import 'package:anime_and_comic_entertainment/utils/utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
@@ -103,13 +104,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         height: 69,
         itemCount: iconList.length,
         tabBuilder: (int index, bool isActive) {
-          final gradientColors =
-              List<Color>.from([Color(0xFFA958FE), Color(0xFFDA5EF0)]);
           final whiteColors = List<Color>.from([
             Color.fromARGB(255, 255, 255, 255),
             Color.fromARGB(255, 239, 239, 239)
           ]);
-          final finalColor = isActive ? gradientColors : whiteColors;
+          final finalColor = isActive ? Utils.gradientColors : whiteColors;
           return Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -149,7 +148,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         },
         backgroundColor: Color(0XFF2D2D2D),
         activeIndex: _bottomNavIndex,
-        splashColor: Color(0xFF892ECC),
+        splashColor: Utils.accentColor,
         splashSpeedInMilliseconds: 0,
         notchSmoothness: NotchSmoothness.defaultEdge,
         gapLocation: GapLocation.none,
