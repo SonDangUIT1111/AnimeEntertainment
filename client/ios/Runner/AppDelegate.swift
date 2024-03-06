@@ -1,6 +1,6 @@
 import UIKit
 import Flutter
-
+import momo_vn
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
   override func application(
