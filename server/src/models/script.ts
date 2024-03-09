@@ -7,7 +7,8 @@ interface Users {
     coinPoint: number,
     bookmarkList: {
         comic: [
-            // ObjectId("example");
+            // ObjectId("example"); id cua comic chapter
+            // percentTime
         ],
         movies: [
 
@@ -59,12 +60,14 @@ interface ComicChapters {
         {
             // *
             userId: string,
+            content: string,
             likes: [
                 //list id of users have likes this comment
             ],
             replies: [
                 {
                     userId: string,
+                    content: string,
                     likes: [
 
                     ],
@@ -139,7 +142,7 @@ interface LikeRecords {
     record: [
         {
             userId: string,
-            createdAt: Date,
+            likedAt: Date,
         }
     ]
 }
