@@ -1,8 +1,8 @@
 import 'package:anime_and_comic_entertainment/pages/anime_home.dart';
 import 'package:anime_and_comic_entertainment/pages/comic_page.dart';
 // import 'package:anime_and_comic_entertainment/pages/home.dart';
-import 'package:anime_and_comic_entertainment/pages/login.dart';
-import 'package:anime_and_comic_entertainment/pages/profile.dart';
+import 'package:anime_and_comic_entertainment/pages/auth/login.dart';
+import 'package:anime_and_comic_entertainment/pages/auth/profile.dart';
 import 'package:anime_and_comic_entertainment/pages/splash.dart';
 import 'package:anime_and_comic_entertainment/providers/user_provider.dart';
 // import 'package:anime_and_comic_entertainment/pages/splash.dart';

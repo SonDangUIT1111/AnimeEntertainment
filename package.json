@@ -1,1 +1,8 @@
-{}
+{
+  "dependencies": {
+    "otp-generator": "^4.0.1"
+  },
+  "devDependencies": {
+    "@types/otp-generator": "^4.0.2"
+  }
+}
