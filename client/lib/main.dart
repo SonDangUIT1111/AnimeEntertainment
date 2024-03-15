@@ -1,4 +1,5 @@
 import 'package:anime_and_comic_entertainment/pages/anime_home.dart';
+import 'package:anime_and_comic_entertainment/pages/auth/get_otp.dart';
 import 'package:anime_and_comic_entertainment/pages/comic_page.dart';
 // import 'package:anime_and_comic_entertainment/pages/home.dart';
 import 'package:anime_and_comic_entertainment/pages/auth/login.dart';
@@ -65,7 +66,7 @@ class _NavigationScreenState extends State<NavigationScreen>
       child: widget.navIndex == 1
           ? ComicPage()
           : widget.navIndex == 4
-              ? Profile()
+              ? GetOTPPage()
               : AnimePage(),
     );
   }

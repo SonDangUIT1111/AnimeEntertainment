@@ -1,13 +1,15 @@
+import 'package:anime_and_comic_entertainment/pages/auth/otp_verify_page.dart';
+import 'package:anime_and_comic_entertainment/services/auth_api.dart';
 import 'package:flutter/material.dart';
 
-class LoginOTPPage extends StatefulWidget {
-  const LoginOTPPage({super.key});
+class GetOTPPage extends StatefulWidget {
+  const GetOTPPage({super.key});
 
   @override
-  State<LoginOTPPage> createState() => _LoginOTPPageState();
+  State<GetOTPPage> createState() => _GetOTPPageState();
 }
 
-class _LoginOTPPageState extends State<LoginOTPPage> {
+class _GetOTPPageState extends State<GetOTPPage> {
   @override
   Widget build(BuildContext context) {
     String mobileNo = "";
@@ -77,7 +79,22 @@ class _LoginOTPPageState extends State<LoginOTPPage> {
         Center(
             child: ElevatedButton(
           child: Text("Submit"),
-          onPressed: () {},
+          onPressed: () async {
+            // if (mobileNo.length > 9) {
+            //   setState(() {
+            //     isAPICallProcess = true;
+            //   });
+            // }
+
+            var result = await AuthApi.getOTP(mobileNo);
+            // setState(() {
+            //   isAPICallProcess = false;
+            // });
+            print(result);
+            // if (result.data != null) {
+            //   Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>OTPVerifyPage(otpHash: result.data, mobileNo: mobileNo)), (route) => false)
+            // }
+          },
         ))
       ]),
     );
