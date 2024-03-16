@@ -2,8 +2,7 @@
 
 import 'dart:convert';
 import 'package:anime_and_comic_entertainment/components/ui/Button.dart';
-import 'package:anime_and_comic_entertainment/pages/auth/get_otp.dart';
-import 'package:anime_and_comic_entertainment/pages/auth/register.dart';
+import 'package:anime_and_comic_entertainment/pages/auth/login.dart';
 import 'package:anime_and_comic_entertainment/utils/utils.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:anime_and_comic_entertainment/providers/user_provider.dart';
@@ -12,14 +11,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
-class Login extends StatefulWidget {
-  const Login({super.key});
+class Register extends StatefulWidget {
+  const Register({super.key});
 
   @override
-  State<Login> createState() => _LoginState();
+  State<Register> createState() => _RegisterState();
 }
 
-class _LoginState extends State<Login> {
+class _RegisterState extends State<Register> {
   bool passwordVisible = false;
   final myControllerPhone = TextEditingController();
   final myControllerPass = TextEditingController();
@@ -89,14 +88,14 @@ class _LoginState extends State<Login> {
               height: 10,
             ),
             Text(
-              "Sign-in",
+              "Sign-up",
               style: TextStyle(
                   color: Colors.white,
                   fontSize: 24,
                   fontWeight: FontWeight.w600),
             ),
             Text(
-              "Đăng nhập để tiếp tục trải nghiệm nào",
+              "Đăng ký tài khoản mới",
               style: TextStyle(
                 color: Colors.grey[300],
                 fontSize: 14,
@@ -141,77 +140,16 @@ class _LoginState extends State<Login> {
                         thickness: .51,
                       ),
                       SizedBox(
-                        height: 10,
-                      ),
-                      SizedBox(
-                        height: 50,
-                        child: TextFormField(
-                          controller: myControllerPass,
-                          obscureText: passwordVisible,
-                          style: TextStyle(color: Colors.white, fontSize: 14),
-                          cursorColor: Colors.white,
-                          decoration: InputDecoration(
-                            border: UnderlineInputBorder(),
-                            hintText: "Mật khẩu",
-                            hintStyle: TextStyle(color: Colors.grey[400]),
-
-                            focusColor: Colors.white,
-
-                            suffixIcon: IconButton(
-                              icon: Icon(passwordVisible
-                                  ? Icons.visibility
-                                  : Icons.visibility_off),
-                              onPressed: () {
-                                setState(
-                                  () {
-                                    passwordVisible = !passwordVisible;
-                                  },
-                                );
-                              },
-                            ),
-                            // alignLabelWithHint: false,
-                            // filled: true,
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return "";
-                            }
-                            return null;
-                          },
-                          keyboardType: TextInputType.visiblePassword,
-                          textInputAction: TextInputAction.done,
-                        ),
-                      ),
-                      SizedBox(
                         height: 20,
                       ),
                       GradientButton(
-                        content: 'Đăng nhập',
+                        content: 'Đăng ký',
                         action: () {
                           _formKey.currentState?.validate();
                         },
                         height: 50,
                         width: 200,
                       ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => GetOTPPage()),
-                          );
-                        },
-                        child: Text(
-                          "Quên mật khẩu",
-                          style: TextStyle(
-                              color: Utils.primaryColor,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500),
-                        ),
-                      )
                     ],
                   )),
             )
@@ -220,7 +158,7 @@ class _LoginState extends State<Login> {
         Positioned(
           child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
             Text(
-              "Chưa có tài khoản?",
+              "Đã có tài khoản?",
               style: TextStyle(color: Colors.white, fontSize: 14),
             ),
             SizedBox(
@@ -228,11 +166,11 @@ class _LoginState extends State<Login> {
             ),
             GestureDetector(
               onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Register()));
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (context) => Login()));
               },
               child: Text(
-                "Đăng ký ngay",
+                "Đăng nhập ngay",
                 style: TextStyle(
                     color: Utils.primaryColor,
                     fontSize: 14,
@@ -263,33 +201,5 @@ class _LoginState extends State<Login> {
           // ]),
           ),
     );
-  }
-}
-
-class LoginOrProfileComponent extends StatefulWidget {
-  const LoginOrProfileComponent({super.key});
-
-  @override
-  State<LoginOrProfileComponent> createState() =>
-      _LoginOrProfileComponentState();
-}
-
-class _LoginOrProfileComponentState extends State<LoginOrProfileComponent> {
-  @override
-  Widget build(BuildContext context) {
-    return Provider.of<UserProvider>(context)
-                .user
-                .authentication['sessionToken'] !=
-            ""
-        ? Container(
-            child: Text("Logout"),
-          )
-        : Container(
-            child: ElevatedButton(
-                onPressed: () async {
-                  await AuthApi.login(context, "antonio@gmail.com", "123");
-                },
-                child: Text('Log in')),
-          );
   }
 }
