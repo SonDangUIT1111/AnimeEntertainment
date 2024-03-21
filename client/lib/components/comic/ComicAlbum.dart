@@ -1,12 +1,9 @@
 import 'package:anime_and_comic_entertainment/components/comic/ComicItem.dart';
 import 'package:anime_and_comic_entertainment/model/comics.dart';
 import 'package:flutter/material.dart';
-import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 import 'package:anime_and_comic_entertainment/model/album.dart';
-import 'package:anime_and_comic_entertainment/model/comics.dart';
 import 'package:anime_and_comic_entertainment/services/comics_api.dart';
-import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ComicAlbumItem extends StatefulWidget {
