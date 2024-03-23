@@ -2,6 +2,7 @@ import 'package:anime_and_comic_entertainment/pages/anime/anime_page.dart';
 import 'package:anime_and_comic_entertainment/pages/challenge/challenge_page.dart';
 import 'package:anime_and_comic_entertainment/pages/comic/comic_page.dart';
 import 'package:anime_and_comic_entertainment/pages/home/home_page.dart';
+import 'package:anime_and_comic_entertainment/pages/payment.dart';
 import 'package:anime_and_comic_entertainment/pages/profile/profile_page.dart';
 import 'package:anime_and_comic_entertainment/pages/test.dart';
 import 'package:anime_and_comic_entertainment/pages/auth/profile.dart';
@@ -37,10 +38,9 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'skylark',
       home: Scaffold(
-        body: MyHomePage(
-          title: 'skylark',
-        ),
-      ),
+          body: MyHomePage(
+        title: "Skylark",
+      )),
     );
   }
 }
