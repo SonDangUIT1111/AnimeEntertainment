@@ -106,6 +106,7 @@ interface AnimeMovies {
     ]
 }
 
+
 interface AnimeEpisodes {
     _id: string,
     // *
@@ -116,6 +117,7 @@ interface AnimeEpisodes {
     content: string,
     likes: string, // id of likerecord
     views: number,
+    publishTime: string,
     comments: [
         {
             // *

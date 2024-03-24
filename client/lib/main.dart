@@ -37,10 +37,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'skylark',
-      home: Scaffold(
-          body: MyHomePage(
-        title: "Skylark",
-      )),
+      home: Scaffold(body: AnimePage()),
     );
   }
 }
