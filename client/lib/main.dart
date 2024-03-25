@@ -1,6 +1,5 @@
 // ignore_for_file: library_private_types_in_public_api
 
-import 'package:anime_and_comic_entertainment/app.dart';
 import 'package:anime_and_comic_entertainment/pages/anime/anime_page.dart';
 import 'package:anime_and_comic_entertainment/pages/challenge/challenge_page.dart';
 import 'package:anime_and_comic_entertainment/pages/comic/comic_page.dart';
@@ -50,39 +49,39 @@ class MyApp extends StatelessWidget {
 
 // set up navigation here --------------------------------------------------------------- //
 
-class NavigationScreen extends StatefulWidget {
-  final int navIndex;
+// class NavigationScreen extends StatefulWidget {
+//   final int navIndex;
 
-  NavigationScreen(this.navIndex) : super();
+//   NavigationScreen(this.navIndex) : super();
 
-  @override
-  _NavigationScreenState createState() => _NavigationScreenState();
-}
+//   @override
+//   _NavigationScreenState createState() => _NavigationScreenState();
+// }
 
-class _NavigationScreenState extends State<NavigationScreen>
-    with TickerProviderStateMixin {
-  @override
-  void initState() {
-    super.initState();
-  }
-  // right here ...
+// class _NavigationScreenState extends State<NavigationScreen>
+//     with TickerProviderStateMixin {
+//   @override
+//   void initState() {
+//     super.initState();
+//   }
+//   // right here ...
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Color(0xFF141414),
-      child: widget.navIndex == 0
-          ? HomePage()
-          : widget.navIndex == 1
-              ? ComicPage()
-              : widget.navIndex == 2
-                  ? AnimePage()
-                  : widget.navIndex == 3
-                      ? ChallengePage()
-                      : ProfilePage(),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       color: Color(0xFF141414),
+//       child: widget.navIndex == 0
+//           ? HomePage()
+//           : widget.navIndex == 1
+//               ? ComicPage()
+//               : widget.navIndex == 2
+//                   ? AnimePage()
+//                   : widget.navIndex == 3
+//                       ? ChallengePage()
+//                       : ProfilePage(),
+//     );
+//   }
+// }
 
 // ------------------------------------------------------------------------------------- //
 class MyHomePage extends StatefulWidget {

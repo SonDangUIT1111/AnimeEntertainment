@@ -1,6 +1,9 @@
+import 'package:anime_and_comic_entertainment/pages/anime/anime_page.dart';
+import 'package:anime_and_comic_entertainment/pages/challenge/challenge_page.dart';
+import 'package:anime_and_comic_entertainment/pages/comic/comic_page.dart';
+import 'package:anime_and_comic_entertainment/pages/home/home_page.dart';
+import 'package:anime_and_comic_entertainment/pages/profile/profile_page.dart';
 import 'package:flutter/material.dart';
-import 'package:anime_and_comic_entertainment/app.dart';
-import 'package:anime_and_comic_entertainment/bottom_navigation.dart';
 
 class TabNavigatorRoutes {
   static const String root = '/';
@@ -19,10 +22,14 @@ class TabNavigator extends StatelessWidget {
       onGenerateRoute: (routeSettings) {
         return MaterialPageRoute(
             builder: (context) => tabItem == "Page1"
-                ? Page1()
+                ? HomePage()
                 : tabItem == "Page2"
-                    ? Page2()
-                    : Page3());
+                    ? ComicPage()
+                    : tabItem == "Page3"
+                        ? AnimePage()
+                        : tabItem == "Page4"
+                            ? ChallengePage()
+                            : ProfilePage());
       },
     );
   }
