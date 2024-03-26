@@ -17,8 +17,10 @@ class HomePage extends StatelessWidget {
       children: [
         GestureDetector(
           onTap: () {
-            Provider.of<VideoProvider>(context, listen: false)
-                .setAnime(Animes(id: "asss", movieName: "aallla"));
+            Provider.of<VideoProvider>(context, listen: false).setAnime(Animes(
+              id: "asss",
+              movieName: "aallla",
+            ));
             Provider.of<MiniPlayerControllerProvider>(context, listen: false)
                 .setMiniController(PanelState.MAX);
           },

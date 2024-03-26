@@ -164,11 +164,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   maxHeight: MediaQuery.of(context).size.height,
                   builder: (height, percentage) {
                     if (res.id == null) return const SizedBox.shrink();
-                    // Provider.of<MiniPlayerControllerProvider>(context,
-                    //         listen: false)
-                    //     .setPercent(percentage);
-                    // if (height <= _playerMinHeight + 200.0)
                     return WatchAnimePage(
+                        videoId: res.id,
                         height: height,
                         percent: percentage,
                         maxHeight: MediaQuery.of(context).size.height);

@@ -6,16 +6,20 @@ import 'package:anime_and_comic_entertainment/providers/video_provider.dart';
 import 'package:anime_and_comic_entertainment/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:chewie/chewie.dart';
+import 'package:getwidget/components/loader/gf_loader.dart';
+import 'package:getwidget/types/gf_loader_type.dart';
 import 'package:miniplayer/miniplayer.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
 class WatchAnimePage extends StatefulWidget {
+  final String? videoId;
   final double height;
   final double percent;
   final double maxHeight;
   const WatchAnimePage(
-      {required this.percent,
+      {required this.videoId,
+      required this.percent,
       required this.height,
       required this.maxHeight,
       super.key});
@@ -77,8 +81,10 @@ class _WatchAnimePageState extends State<WatchAnimePage> {
         _playerWidget = Chewie(controller: _chewieController);
         setState(() {});
       });
-    _controllerAd = VideoPlayerController.networkUrl(Uri.parse(
-        'https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4'))
+    _controllerAd = VideoPlayerController.networkUrl(Uri.parse(widget.videoId ==
+            'asss'
+        ? 'https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4'
+        : 'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4'))
       ..initialize().then((_) {
         _chewieControllerAd = ChewieController(
             videoPlayerController: _controllerAd,
@@ -131,12 +137,24 @@ class _WatchAnimePageState extends State<WatchAnimePage> {
                                       ? MediaQuery.of(context).size.width *
                                           widget.percent
                                       : 186,
-                                  child: AspectRatio(
-                                    aspectRatio: _controller.value.aspectRatio,
-                                    child: Container(
-                                      color: const Color(0xFF141414),
-                                    ),
-                                  )),
+                                  child: _controllerAd.value.isInitialized
+                                      ? AspectRatio(
+                                          aspectRatio:
+                                              _controllerAd.value.aspectRatio,
+                                          child: Container(
+                                            color: const Color(0xFF141414),
+                                          ),
+                                        )
+                                      : AspectRatio(
+                                          aspectRatio: 16 / 9,
+                                          child: Container(
+                                            color: Colors.grey[300],
+                                            child: const Center(
+                                              child: GFLoader(
+                                                  type: GFLoaderType.circle),
+                                            ),
+                                          ),
+                                        )),
                               SizedBox(
                                 width: MediaQuery.of(context).size.width *
                                             widget.percent >
