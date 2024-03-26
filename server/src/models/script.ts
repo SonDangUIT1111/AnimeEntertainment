@@ -80,7 +80,9 @@ interface ComicChapters {
             ]
         }
     ],
-    likes: string, // id of likerecord
+    likes: [
+        // list of id user
+    ], // id of likerecord
     views: number,
     unlockPrice: number,
     userUnlocked: [
@@ -115,7 +117,9 @@ interface AnimeEpisodes {
     totalTime: string,
     // *
     content: string,
-    likes: string, // id of likerecord
+    likes: [
+        // list of id user
+    ], // id of likerecord
     views: number,
     publishTime: string,
     comments: [
@@ -140,16 +144,6 @@ interface AnimeEpisodes {
     ],
     // *
     advertisement: string,
-}
-
-interface LikeRecords {
-    _id: string,
-    record: [
-        {
-            userId: string,
-            likedAt: Date,
-        }
-    ]
 }
 
 interface Genres {

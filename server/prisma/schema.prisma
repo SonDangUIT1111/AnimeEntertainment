@@ -68,6 +68,7 @@ type UsersHistories {
 
 model animeepisodes {
   id          String                  @id @default(auto()) @map("_id") @db.ObjectId
+  adLink      String
   advertising String
   comments    AnimeepisodesComments[]
   content     String
@@ -78,7 +79,6 @@ model animeepisodes {
   publicTime  DateTime                @db.Date
   totalTime   Int
   views       Int
-  adLink      String
 }
 
 model animes {
@@ -86,8 +86,7 @@ model animes {
   ageFor         String
   coverImage     String
   description    String
-  /// Could not determine type: the field only had null or empty values in the sample set.
-  episodes       Json?
+  episodes       String[]
   genres         String[]
   landspaceImage String
   movieName      String
@@ -113,7 +112,8 @@ model comicchapters {
   comments     ComicchaptersComments[]
   content      String[]
   coverImage   String
-  likes        String                  @db.ObjectId
+  /// Could not determine type: the field only had null or empty values in the sample set.
+  likes        Json?
   publicTime   DateTime                @db.Date
   unlockPrice  Int
   /// Could not determine type: the field only had null or empty values in the sample set.
@@ -139,11 +139,6 @@ model comics {
 model genres {
   id        String @id @default(auto()) @map("_id") @db.ObjectId
   genreName String
-}
-
-model likeRecords {
-  id     String   @id @default(auto()) @map("_id") @db.ObjectId
-  record String[]
 }
 
 model users {

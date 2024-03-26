@@ -1,6 +1,9 @@
 // ignore_for_file: library_private_types_in_public_api
 
+import 'package:anime_and_comic_entertainment/components/animes/VideoComponent.dart';
+import 'package:anime_and_comic_entertainment/model/animes.dart';
 import 'package:anime_and_comic_entertainment/pages/anime/anime_page.dart';
+import 'package:anime_and_comic_entertainment/pages/anime/watch_anime_page.dart';
 import 'package:anime_and_comic_entertainment/pages/challenge/challenge_page.dart';
 import 'package:anime_and_comic_entertainment/pages/comic/comic_page.dart';
 import 'package:anime_and_comic_entertainment/pages/home/home_page.dart';
@@ -9,8 +12,9 @@ import 'package:anime_and_comic_entertainment/pages/profile/profile_page.dart';
 import 'package:anime_and_comic_entertainment/pages/test.dart';
 import 'package:anime_and_comic_entertainment/pages/auth/profile.dart';
 import 'package:anime_and_comic_entertainment/pages/home/splash.dart';
+import 'package:anime_and_comic_entertainment/providers/mini_player_controller_provider.dart';
 import 'package:anime_and_comic_entertainment/providers/user_provider.dart';
-import 'package:anime_and_comic_entertainment/providers/index_page_provider.dart';
+import 'package:anime_and_comic_entertainment/providers/video_provider.dart';
 import 'package:anime_and_comic_entertainment/tab_navigator.dart';
 import 'package:anime_and_comic_entertainment/utils/apiKey.dart';
 import 'package:anime_and_comic_entertainment/utils/utils.dart';
@@ -20,6 +24,7 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:miniplayer/miniplayer.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -28,6 +33,8 @@ void main() async {
   await Stripe.instance.applySettings();
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (context) => UserProvider()),
+    ChangeNotifierProvider(create: (context) => VideoProvider()),
+    ChangeNotifierProvider(create: (context) => MiniPlayerControllerProvider())
   ], child: const MyApp()));
 }
 
@@ -38,12 +45,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'skylark',
-      home: MyHomePage(
-        title: 'Skylark',
-      ),
-    );
+        debugShowCheckedModeBanner: false,
+        title: 'skylark',
+        color: const Color(0xFF141414),
+        home: MyHomePage(
+          title: "skylark",
+        ));
   }
 }
 
@@ -84,6 +91,7 @@ class MyApp extends StatelessWidget {
 // }
 
 // ------------------------------------------------------------------------------------- //
+
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
 
@@ -94,6 +102,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
+  static const double _playerMinHeight = 112.0;
   final autoSizeGroup = AutoSizeGroup();
   var _bottomNavIndex = 0; //default index of a first screen
 
@@ -135,13 +144,39 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(children: <Widget>[
-        _buildOffstageNavigator("Page1"),
-        _buildOffstageNavigator("Page2"),
-        _buildOffstageNavigator("Page3"),
-        _buildOffstageNavigator("Page4"),
-        _buildOffstageNavigator("Page5"),
-      ]),
+      body: Consumer(
+        builder: (context, watch, _) {
+          final res = Provider.of<VideoProvider>(context).anime;
+          final miniPlayerController =
+              Provider.of<MiniPlayerControllerProvider>(context).state;
+
+          return Stack(children: <Widget>[
+            _buildOffstageNavigator("Page1"),
+            _buildOffstageNavigator("Page2"),
+            _buildOffstageNavigator("Page3"),
+            _buildOffstageNavigator("Page4"),
+            _buildOffstageNavigator("Page5"),
+            Offstage(
+              offstage: res.id == null,
+              child: Miniplayer(
+                  controller: miniPlayerController,
+                  minHeight: _playerMinHeight,
+                  maxHeight: MediaQuery.of(context).size.height,
+                  builder: (height, percentage) {
+                    if (res.id == null) return const SizedBox.shrink();
+                    // Provider.of<MiniPlayerControllerProvider>(context,
+                    //         listen: false)
+                    //     .setPercent(percentage);
+                    // if (height <= _playerMinHeight + 200.0)
+                    return WatchAnimePage(
+                        height: height,
+                        percent: percentage,
+                        maxHeight: MediaQuery.of(context).size.height);
+                  }),
+            ),
+          ]);
+        },
+      ),
       bottomNavigationBar: AnimatedBottomNavigationBar.builder(
           height: 60,
           itemCount: iconList.length,

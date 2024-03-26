@@ -102,10 +102,13 @@ class _AnimePageState extends State<AnimePage> {
                 scrollDirection: Axis.horizontal,
                 itemCount: listAnimes.length,
                 itemBuilder: (context, index) {
-                  return ComicItem(
-                      urlImage: listAnimes[index].coverImage,
-                      nameItem: listAnimes[index].movieName,
-                      genres: listAnimes[index].genres);
+                  return GestureDetector(
+                    onTap: () {},
+                    child: ComicItem(
+                        urlImage: listAnimes[index].coverImage,
+                        nameItem: listAnimes[index].movieName,
+                        genres: listAnimes[index].genres),
+                  );
                 }));
   }
 }
