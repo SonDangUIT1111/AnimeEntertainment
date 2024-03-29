@@ -6,6 +6,7 @@ import 'package:anime_and_comic_entertainment/components/animes/NewEpisodeList.d
 import 'package:anime_and_comic_entertainment/components/comic/ComicItem.dart';
 import 'package:anime_and_comic_entertainment/model/animes.dart';
 import 'package:anime_and_comic_entertainment/services/animes_api.dart';
+import 'package:anime_and_comic_entertainment/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/components/appbar/gf_appbar.dart';
 import 'package:getwidget/components/button/gf_icon_button.dart';
@@ -91,6 +92,26 @@ class _AnimePageState extends State<AnimePage> {
               padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
               child: AnimeAlbumComponent(),
             ),
+            ShaderMask(
+                shaderCallback: (rect) => LinearGradient(
+                    colors: Utils.top1gradientColors,
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: [0, 1]).createShader(rect),
+                child: Text(
+                  "1",
+                  style: TextStyle(
+                      shadows: [
+                        Shadow(
+                          color: Colors.blue,
+                          blurRadius: 0.0,
+                          offset: Offset(2.0, 2.0),
+                        ),
+                      ],
+                      color: Colors.white,
+                      fontSize: 69,
+                      fontWeight: FontWeight.w900),
+                )),
           ],
         ));
   }

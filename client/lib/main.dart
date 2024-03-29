@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'skylark',
         color: const Color(0xFF141414),
-        home: TabBarDemo());
+        home: DetailAnimePage());
   }
 }
 
@@ -230,6 +230,14 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           rightCornerRadius: 24,
           // onTap: (index) => setState(() => _bottomNavIndex = index),
           onTap: (index) => {
+                if (Provider.of<MiniPlayerControllerProvider>(context,
+                        listen: false)
+                    .isMax)
+                  {
+                    Provider.of<MiniPlayerControllerProvider>(context,
+                            listen: false)
+                        .setMiniController(PanelState.MIN)
+                  },
                 setState(() => _selectTab(pageKeys[index], index)),
                 setState(() {
                   _bottomNavIndex = index;
