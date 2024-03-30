@@ -3,6 +3,7 @@ import 'package:anime_and_comic_entertainment/components/MainBanner.dart';
 import 'package:anime_and_comic_entertainment/components/animes/AnimeAlbum.dart';
 import 'package:anime_and_comic_entertainment/components/animes/AnimeBanner.dart';
 import 'package:anime_and_comic_entertainment/components/animes/NewEpisodeList.dart';
+import 'package:anime_and_comic_entertainment/components/animes/TopRankingAnime.dart';
 import 'package:anime_and_comic_entertainment/components/comic/ComicItem.dart';
 import 'package:anime_and_comic_entertainment/model/animes.dart';
 import 'package:anime_and_comic_entertainment/services/animes_api.dart';
@@ -92,26 +93,20 @@ class _AnimePageState extends State<AnimePage> {
               padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
               child: AnimeAlbumComponent(),
             ),
-            ShaderMask(
-                shaderCallback: (rect) => LinearGradient(
-                    colors: Utils.top1gradientColors,
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    stops: [0, 1]).createShader(rect),
-                child: Text(
-                  "1",
-                  style: TextStyle(
-                      shadows: [
-                        Shadow(
-                          color: Colors.blue,
-                          blurRadius: 0.0,
-                          offset: Offset(2.0, 2.0),
-                        ),
-                      ],
-                      color: Colors.white,
-                      fontSize: 69,
-                      fontWeight: FontWeight.w900),
-                )),
+            Padding(
+              padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+              child: Text(
+                "️🏆 Bảng xếp hạng",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(10, 10, 0, 0),
+              child: SizedBox(height: 300, child: TopRankingAnime()),
+            ),
           ],
         ));
   }

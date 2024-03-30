@@ -50,7 +50,9 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'skylark',
         color: const Color(0xFF141414),
-        home: DetailAnimePage());
+        home: MyHomePage(
+          title: '',
+        ));
   }
 }
 
@@ -144,6 +146,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF141414),
       body: Consumer(
         builder: (context, watch, _) {
           final res = Provider.of<VideoProvider>(context).anime;
