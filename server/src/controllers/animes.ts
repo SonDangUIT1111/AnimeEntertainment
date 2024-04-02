@@ -380,3 +380,54 @@ export const getAnimeDetailInEpisodePageById: RequestHandler = async (
     next(error);
   }
 };
+
+export const updateEpisodeView: RequestHandler = async (req, res, next) => {
+  try {
+    const { episodeId } = req.body;
+    var episode = await AnimeEpisodeModel.findById(episodeId);
+    if (!episode) {
+      return res.sendStatus(400);
+    }
+    episode.views = episode.views! + 1;
+    await episode?.save();
+    return res.status(200).json(episode).end();
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const addUserLikeEpisode: RequestHandler = async (req, res, next) => {
+  try {
+    const { episodeId, userId } = req.body;
+    var episode = await AnimeEpisodeModel.findById(episodeId);
+    if (!episode) {
+      return res.sendStatus(400);
+    }
+    episode.likes.push(new mongoose.Types.ObjectId(userId));
+    await episode?.save();
+    return res.status(200).json(episode).end();
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const checkUserHasLikeEpisode: RequestHandler = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const { episodeId, userId } = req.body;
+    var episode = await AnimeEpisodeModel.findById(episodeId);
+    if (!episode) {
+      return res.sendStatus(400);
+    }
+    var check = episode.likes.filter(
+      (item) => (item = new mongoose.Types.ObjectId(userId))
+    );
+    if (check.length == 0) return res.status(200).json({ result: false }).end();
+    else return res.status(200).json({ result: true }).end();
+  } catch (error) {
+    next(error);
+  }
+};

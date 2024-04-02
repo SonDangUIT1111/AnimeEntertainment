@@ -330,4 +330,19 @@ class AnimesApi {
           MaterialPageRoute(builder: (context) => const NoInternetPage()));
     }
   }
+
+  static updateEpisodeView(BuildContext context, episodeId) async {
+    var url = Uri.parse(
+      "${baseUrl}updateEpisodeView",
+    );
+    try {
+      var body = {
+        "episodeId": episodeId,
+      };
+      await http.post(url, body: body);
+    } catch (e) {
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const NoInternetPage()));
+    }
+  }
 }
