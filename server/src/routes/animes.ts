@@ -32,10 +32,12 @@ router.post(
 
 router.post("/updateEpisodeView", AnimeController.updateEpisodeView);
 
-router.post("/addUserLikeEpisode", AnimeController.addUserLikeEpisode);
+router.post("/updateUserLikeEpisode", AnimeController.updateUserLikeEpisode);
+
+router.post("/updateUserSaveEpisode", AnimeController.updateUserSaveEpisode);
 
 router.post(
-  "/checkUserHasLikeEpisode",
-  AnimeController.checkUserHasLikeEpisode
+  "/checkUserHasLikeOrSaveEpisode",
+  AnimeController.checkUserHasLikeOrSaveEpisode
 );
 export default router;

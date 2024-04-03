@@ -62,6 +62,9 @@ class _WatchAnimePageState extends State<WatchAnimePage>
   late AnimeEpisodes detailAnimeEpisode = AnimeEpisodes();
   late List<int> bufferWatchRecord = [];
   late bool viewDone = false;
+  late bool hadLiked = false;
+  late bool hadSaved = false;
+  late bool isLogedIn = false;
 
   Future<void> _launchUrl(String urlAd) async {
     if (!await launchUrl(Uri.parse(urlAd))) {
@@ -70,7 +73,7 @@ class _WatchAnimePageState extends State<WatchAnimePage>
   }
 
   void handlePush(int value) {
-    if (bufferWatchRecord.length == 30) {
+    if (bufferWatchRecord.length == 2) {
       if (viewDone == false) {
         viewDone = !viewDone;
         AnimesApi.updateEpisodeView(context, widget.videoId);
@@ -100,6 +103,16 @@ class _WatchAnimePageState extends State<WatchAnimePage>
     return result;
   }
 
+  void checkUserHasLikeOrSaveEpisode() async {
+    var userId = Provider.of<UserProvider>(context, listen: false).user.id;
+    if (userId == "") return;
+    isLogedIn = true;
+    var result = await AnimesApi.checkUserHasLikeOrSaveEpisode(
+        context, widget.videoId, userId);
+    hadLiked = result['like'];
+    hadSaved = result['bookmark'];
+  }
+
   _handleTabSelection() {
     setState(() {
       _tabIndex = _tabController.index;
@@ -117,7 +130,7 @@ class _WatchAnimePageState extends State<WatchAnimePage>
     _tabController.addListener(() {
       _handleTabSelection();
     });
-
+    checkUserHasLikeOrSaveEpisode();
     getAnimeEpisodeDetailById().then((value) {
       setState(() {
         detailAnimeEpisode = value;
@@ -129,7 +142,7 @@ class _WatchAnimePageState extends State<WatchAnimePage>
           }));
 
       _controller = VideoPlayerController.networkUrl(Uri.parse(
-          "https://scontent.cdninstagram.com/v/t2/f1/m69/GICWmADPc1VCV0MBAC45A-lC65REbmdjAAAF.mp4?efg=eyJ2ZW5jb2RlX3RhZyI6Im9lcF9oZCJ9&_nc_ht=scontent-sof1-1.xx.fbcdn.net&_nc_cat=102&strext=1&vs=6b0aec1cb9c00f1a&_nc_vs=HBksFQIYOnBhc3N0aHJvdWdoX2V2ZXJzdG9yZS9HSUNXbUFEUGMxVkNWME1CQUM0NUEtbEM2NVJFYm1kakFBQUYVAALIAQAVAhg6cGFzc3Rocm91Z2hfZXZlcnN0b3JlL0dJQ1dtQUMtMl9FT21WMEJBRWE1TVdsSlpYMW9idjRHQUFBRhUCAsgBAEsHiBJwcm9ncmVzc2l2ZV9yZWNpcGUBMQ1zdWJzYW1wbGVfZnBzABB2bWFmX2VuYWJsZV9uc3ViACBtZWFzdXJlX29yaWdpbmFsX3Jlc29sdXRpb25fc3NpbQAoY29tcHV0ZV9zc2ltX29ubHlfYXRfb3JpZ2luYWxfcmVzb2x1dGlvbgAddXNlX2xhbmN6b3NfZm9yX3ZxbV91cHNjYWxpbmcAEWRpc2FibGVfcG9zdF9wdnFzABUAJQAcjBdAAAAAAAAAABERAAAAJqKnjJT8uvUDFQIoAkMzGAt2dHNfcHJldmlldxwXQJckbItDlYEYIWRhc2hfZ2VuMmh3YmFzaWNfaHEyX2ZyYWdfMl92aWRlbxIAGBh2aWRlb3MudnRzLmNhbGxiYWNrLnByb2Q4ElZJREVPX1ZJRVdfUkVRVUVTVBsKiBVvZW1fdGFyZ2V0X2VuY29kZV90YWcGb2VwX2hkE29lbV9yZXF1ZXN0X3RpbWVfbXMBMAxvZW1fY2ZnX3J1bGUHdW5tdXRlZBNvZW1fcm9pX3JlYWNoX2NvdW50ATARb2VtX2lzX2V4cGVyaW1lbnQADG9lbV92aWRlb19pZBA3MjY1NTgyMTQzNDkxMjU5Em9lbV92aWRlb19hc3NldF9pZBAzNTY2MDU3MTgwMzcyMTMzFW9lbV92aWRlb19yZXNvdXJjZV9pZBAxMTAyNzIzNzQ3NTE0ODMzHG9lbV9zb3VyY2VfdmlkZW9fZW5jb2RpbmdfaWQQMTUyMjQ4ODM3ODMzMTc2NQ52dHNfcmVxdWVzdF9pZAAlAhwAJcQBGweIAXMENDEwMwJjZAoyMDI0LTAzLTMwA3JjYgEwA2FwcAVWaWRlbwJjdBlDT05UQUlORURfUE9TVF9BVFRBQ0hNRU5UE29yaWdpbmFsX2R1cmF0aW9uX3MIMTQ4MS4xOTQCdHMVcHJvZ3Jlc3NpdmVfZW5jb2RpbmdzAA%3D%3D&ccb=9-4&oh=00_AfDZHZa2oIQn-3ODn-smmFR2zYYf_XSpwxoQNZI5NntvUg&oe=660BEB7D&_nc_sid=1d576d&_nc_rid=272734147062416&_nc_store_type=1"))
+          "https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4"))
         ..initialize().then((_) {
           // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
           _chewieController = ChewieController(
@@ -395,218 +408,275 @@ class _WatchAnimePageState extends State<WatchAnimePage>
               : Expanded(
                   child: ListView(
                     children: [
-                      SizedBox(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ShaderMask(
-                                shaderCallback: (rect) => LinearGradient(
-                                        colors: Utils.gradientColors,
-                                        begin: Alignment.centerLeft,
-                                        stops: const [0, 0.4],
-                                        end: Alignment.centerRight)
-                                    .createShader(rect),
-                                child: Row(
-                                  children: [
-                                    const FaIcon(
-                                      FontAwesomeIcons.youtube,
-                                      color: Colors.white,
-                                      size: 14,
-                                    ),
-                                    const SizedBox(
-                                      width: 8,
-                                    ),
-                                    Flexible(
-                                      child: Text(
-                                        detailAnime.movieName!,
-                                        maxLines: 1,
-                                        textAlign: TextAlign.center,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600),
+                      GestureDetector(
+                        onTap: () {},
+                        child: SizedBox(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ShaderMask(
+                                  shaderCallback: (rect) => LinearGradient(
+                                          colors: Utils.gradientColors,
+                                          begin: Alignment.centerLeft,
+                                          stops: const [0, 0.4],
+                                          end: Alignment.centerRight)
+                                      .createShader(rect),
+                                  child: Row(
+                                    children: [
+                                      const FaIcon(
+                                        FontAwesomeIcons.youtube,
+                                        color: Colors.white,
+                                        size: 14,
                                       ),
-                                    ),
-                                  ],
+                                      const SizedBox(
+                                        width: 8,
+                                      ),
+                                      Flexible(
+                                        child: Text(
+                                          detailAnime.movieName!,
+                                          maxLines: 1,
+                                          textAlign: TextAlign.center,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(
-                                height: 4,
-                              ),
-                              Text(
-                                detailAnimeEpisode.episodeName!,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 20),
-                              ),
-                              const SizedBox(
-                                height: 8,
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  if (Provider.of<UserProvider>(context,
-                                              listen: false)
-                                          .user
-                                          .authentication['sessionToken'] !=
-                                      "") {
-                                    // like
-                                    print("like");
-                                  } else {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                const Login()));
-                                  }
-                                },
-                                child: const Center(
+                                const SizedBox(
+                                  height: 4,
+                                ),
+                                Text(
+                                  detailAnimeEpisode.episodeName!,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 20),
+                                ),
+                                const SizedBox(
+                                  height: 8,
+                                ),
+                                Center(
                                   child: Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceEvenly,
                                     children: [
-                                      Column(children: [
-                                        FaIcon(
-                                          FontAwesomeIcons.solidThumbsUp,
-                                          color: Colors.grey,
-                                          size: 18,
-                                        ),
-                                        SizedBox(
-                                          height: 4,
-                                        ),
-                                        Text(
-                                          "Thích",
-                                          style: TextStyle(
-                                              color: Colors.grey, fontSize: 12),
-                                        )
-                                      ]),
-                                      Column(children: [
-                                        FaIcon(
-                                          FontAwesomeIcons.solidBookmark,
-                                          color: Colors.grey,
-                                          size: 18,
-                                        ),
-                                        SizedBox(
-                                          height: 4,
-                                        ),
-                                        Text(
-                                          "Lưu phim",
-                                          style: TextStyle(
-                                              color: Colors.grey, fontSize: 12),
-                                        )
-                                      ]),
+                                      GestureDetector(
+                                        onTap: () {
+                                          if (Provider.of<UserProvider>(context,
+                                                          listen: false)
+                                                      .user
+                                                      .authentication[
+                                                  'sessionToken'] !=
+                                              "") {
+                                            AnimesApi.updateUserLikeEpisode(
+                                                context,
+                                                widget.videoId,
+                                                Provider.of<UserProvider>(
+                                                        context,
+                                                        listen: false)
+                                                    .user
+                                                    .id);
+                                            setState(
+                                              () {
+                                                hadLiked = !hadLiked;
+                                              },
+                                            );
+                                          } else {
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        const Login()));
+                                          }
+                                        },
+                                        child: Column(children: [
+                                          FaIcon(
+                                            FontAwesomeIcons.solidThumbsUp,
+                                            color: hadLiked
+                                                ? Utils.primaryColor
+                                                : Colors.grey,
+                                            size: 20,
+                                          ),
+                                          const SizedBox(
+                                            height: 4,
+                                          ),
+                                          Text(
+                                            "Thích",
+                                            style: TextStyle(
+                                                color: hadLiked
+                                                    ? Utils.primaryColor
+                                                    : Colors.grey,
+                                                fontSize: 12),
+                                          )
+                                        ]),
+                                      ),
+                                      GestureDetector(
+                                        onTap: () {
+                                          if (Provider.of<UserProvider>(context,
+                                                          listen: false)
+                                                      .user
+                                                      .authentication[
+                                                  'sessionToken'] !=
+                                              "") {
+                                            AnimesApi.updateUserSaveEpisode(
+                                                context,
+                                                widget.videoId,
+                                                Provider.of<UserProvider>(
+                                                        context,
+                                                        listen: false)
+                                                    .user
+                                                    .id);
+                                            setState(
+                                              () {
+                                                hadSaved = !hadSaved;
+                                              },
+                                            );
+                                          } else {
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        const Login()));
+                                          }
+                                        },
+                                        child: Column(children: [
+                                          FaIcon(
+                                            FontAwesomeIcons.solidBookmark,
+                                            color: hadSaved
+                                                ? Utils.accentColor
+                                                : Colors.grey,
+                                            size: 18,
+                                          ),
+                                          const SizedBox(
+                                            height: 4,
+                                          ),
+                                          Text(
+                                            "Lưu phim",
+                                            style: TextStyle(
+                                                color: hadSaved
+                                                    ? Utils.accentColor
+                                                    : Colors.grey,
+                                                fontSize: 12),
+                                          )
+                                        ]),
+                                      ),
                                     ],
                                   ),
                                 ),
-                              ),
-                              const SizedBox(
-                                height: 2,
-                              ),
-                              const SizedBox(
-                                height: 8,
-                              ),
-                              Row(
-                                children: [
-                                  const Text(
-                                    "Dành cho độ tuổi: ",
-                                    style: TextStyle(color: Colors.grey),
-                                  ),
-                                  Flexible(
-                                    child: Text(detailAnime.ageFor!,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                            color: Utils.accentColor,
-                                            fontWeight: FontWeight.w600)),
-                                  )
-                                ],
-                              ),
-                              const SizedBox(
-                                height: 2,
-                              ),
-                              Row(
-                                children: [
-                                  const Text(
-                                    "Thể loại: ",
-                                    style: TextStyle(color: Colors.grey),
-                                  ),
-                                  Expanded(
-                                    child: Wrap(
-                                        spacing: 2,
-                                        children: List.generate(
-                                          detailAnime.genres!.length,
-                                          (index) => GestureDetector(
-                                            onTap: () {
-                                              print(detailAnime.genres![index]
-                                                  ['genreName']);
-                                            },
-                                            child: Text(
-                                                detailAnime.genres![index]
-                                                        ['genreName'] +
-                                                    (index ==
-                                                            detailAnime.genres!
-                                                                    .length -
-                                                                1
-                                                        ? ""
-                                                        : ", "),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                    color: Utils.primaryColor,
-                                                    fontWeight:
-                                                        FontWeight.w600)),
-                                          ),
-                                        )),
-                                  )
-                                ],
-                              ),
-                              const SizedBox(
-                                height: 2,
-                              ),
-                              Row(
-                                children: [
-                                  const Text(
-                                    "Phát sóng: ",
-                                    style: TextStyle(color: Colors.grey),
-                                  ),
-                                  Flexible(
-                                    child: Text(detailAnime.publishTime!,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                            color: Colors.grey[400],
-                                            fontWeight: FontWeight.w600)),
-                                  )
-                                ],
-                              ),
-                              const SizedBox(
-                                height: 2,
-                              ),
-                              Row(
-                                children: [
-                                  const Text(
-                                    "Nhà phát hành: ",
-                                    style: TextStyle(color: Colors.grey),
-                                  ),
-                                  Flexible(
-                                    child: Text(detailAnime.publisher!,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w600)),
-                                  )
-                                ],
-                              ),
-                              const SizedBox(
-                                height: 8,
-                              ),
-                            ],
+                                const SizedBox(
+                                  height: 2,
+                                ),
+                                const SizedBox(
+                                  height: 8,
+                                ),
+                                Row(
+                                  children: [
+                                    const Text(
+                                      "Dành cho độ tuổi: ",
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
+                                    Flexible(
+                                      child: Text(detailAnime.ageFor!,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                              color: Utils.accentColor,
+                                              fontWeight: FontWeight.w600)),
+                                    )
+                                  ],
+                                ),
+                                const SizedBox(
+                                  height: 2,
+                                ),
+                                Row(
+                                  children: [
+                                    const Text(
+                                      "Thể loại: ",
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
+                                    Expanded(
+                                      child: Wrap(
+                                          spacing: 2,
+                                          children: List.generate(
+                                            detailAnime.genres!.length,
+                                            (index) => GestureDetector(
+                                              onTap: () {
+                                                print(detailAnime.genres![index]
+                                                    ['genreName']);
+                                              },
+                                              child: Text(
+                                                  detailAnime.genres![index]
+                                                          ['genreName'] +
+                                                      (index ==
+                                                              detailAnime
+                                                                      .genres!
+                                                                      .length -
+                                                                  1
+                                                          ? ""
+                                                          : ", "),
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                      color: Utils.primaryColor,
+                                                      fontWeight:
+                                                          FontWeight.w600)),
+                                            ),
+                                          )),
+                                    )
+                                  ],
+                                ),
+                                const SizedBox(
+                                  height: 2,
+                                ),
+                                Row(
+                                  children: [
+                                    const Text(
+                                      "Phát sóng: ",
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
+                                    Flexible(
+                                      child: Text(detailAnime.publishTime!,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                              color: Colors.grey[400],
+                                              fontWeight: FontWeight.w600)),
+                                    )
+                                  ],
+                                ),
+                                const SizedBox(
+                                  height: 2,
+                                ),
+                                Row(
+                                  children: [
+                                    const Text(
+                                      "Nhà phát hành: ",
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
+                                    Flexible(
+                                      child: Text(detailAnime.publisher!,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w600)),
+                                    )
+                                  ],
+                                ),
+                                const SizedBox(
+                                  height: 8,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -633,159 +703,167 @@ class _WatchAnimePageState extends State<WatchAnimePage>
                       ),
                       Padding(
                         padding: const EdgeInsets.only(bottom: 30),
-                        child: SizedBox(
-                          // height: detailAnime.episodes!.length * 88,
-                          height: _tabIndex == 0
-                              ? (detailAnime.episodes!.length * 108)
-                              : (12 * 108),
-                          child: TabBarView(
-                            controller: _tabController,
-                            children: [
-                              Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(20, 0, 20, 0),
-                                child: Column(
-                                    children: List.generate(
-                                        detailAnime.episodes!.length, (index) {
-                                  return Padding(
-                                    padding: const EdgeInsets.only(top: 12),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                          color: Colors.white.withOpacity(0.05),
-                                          borderRadius:
-                                              BorderRadius.circular(8)),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8),
-                                        child: Row(
-                                          children: [
-                                            Container(
-                                              color: Colors.transparent,
-                                              height: 80,
-                                              child: AspectRatio(
-                                                aspectRatio: 16 / 9,
-                                                child: CachedNetworkImage(
-                                                  imageUrl: detailAnime
-                                                          .episodes![index]
-                                                      ['coverImage'],
-                                                  placeholder: (context, url) =>
-                                                      Container(
-                                                    width: 125,
-                                                    color: Colors.blue,
-                                                    child: Shimmer.fromColors(
-                                                      baseColor:
-                                                          Colors.grey.shade300,
-                                                      highlightColor:
-                                                          Colors.grey.shade100,
-                                                      child: Container(
-                                                        width: 125,
-                                                        color: Colors.yellow,
+                        child: GestureDetector(
+                          onTap: () {},
+                          child: SizedBox(
+                            // height: detailAnime.episodes!.length * 88,
+                            height: _tabIndex == 0
+                                ? (detailAnime.episodes!.length * 108)
+                                : (12 * 108),
+                            child: TabBarView(
+                              controller: _tabController,
+                              children: [
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                                  child: Column(
+                                      children: List.generate(
+                                          detailAnime.episodes!.length,
+                                          (index) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(top: 12),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                            color:
+                                                Colors.white.withOpacity(0.05),
+                                            borderRadius:
+                                                BorderRadius.circular(8)),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8),
+                                          child: Row(
+                                            children: [
+                                              Container(
+                                                color: Colors.transparent,
+                                                height: 80,
+                                                child: AspectRatio(
+                                                  aspectRatio: 16 / 9,
+                                                  child: CachedNetworkImage(
+                                                    imageUrl: detailAnime
+                                                            .episodes![index]
+                                                        ['coverImage'],
+                                                    placeholder:
+                                                        (context, url) =>
+                                                            Container(
+                                                      width: 125,
+                                                      color: Colors.blue,
+                                                      child: Shimmer.fromColors(
+                                                        baseColor: Colors
+                                                            .grey.shade300,
+                                                        highlightColor: Colors
+                                                            .grey.shade100,
+                                                        child: Container(
+                                                          width: 125,
+                                                          color: Colors.yellow,
+                                                        ),
                                                       ),
                                                     ),
+                                                    imageBuilder: (context,
+                                                        imageProvider) {
+                                                      return Container(
+                                                        decoration: BoxDecoration(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        4),
+                                                            image: DecorationImage(
+                                                                image:
+                                                                    imageProvider,
+                                                                fit: BoxFit
+                                                                    .fill)),
+                                                      );
+                                                    },
                                                   ),
-                                                  imageBuilder:
-                                                      (context, imageProvider) {
-                                                    return Container(
-                                                      decoration: BoxDecoration(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(4),
-                                                          image: DecorationImage(
-                                                              image:
-                                                                  imageProvider,
-                                                              fit:
-                                                                  BoxFit.fill)),
-                                                    );
-                                                  },
                                                 ),
                                               ),
-                                            ),
-                                            const SizedBox(
-                                              width: 10,
-                                            ),
-                                            Expanded(
-                                              child: SizedBox(
-                                                  height: 80,
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      Text(
-                                                        detailAnime.episodes![
-                                                                index]
-                                                            ['episodeName'],
-                                                        maxLines: 2,
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
-                                                        style: const TextStyle(
-                                                            color: Colors.white,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .w600),
-                                                      ),
-                                                      Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                        children: [
-                                                          Row(
-                                                            children: [
-                                                              const FaIcon(
-                                                                FontAwesomeIcons
-                                                                    .clock,
-                                                                color:
-                                                                    Colors.grey,
-                                                                size: 12,
-                                                              ),
-                                                              const SizedBox(
-                                                                width: 4,
-                                                              ),
-                                                              Text(
-                                                                Utils.convertTotalTime(
-                                                                    detailAnime.episodes![
-                                                                            index]
-                                                                        [
-                                                                        'totalTime']),
-                                                                style: const TextStyle(
-                                                                    color: Colors
-                                                                        .grey),
-                                                              )
-                                                            ],
-                                                          ),
-                                                          ShaderMask(
-                                                              shaderCallback: (rect) =>
-                                                                  LinearGradient(
-                                                                    colors: Utils
-                                                                        .gradientColors,
-                                                                    begin: Alignment
-                                                                        .topCenter,
-                                                                  ).createShader(
-                                                                      rect),
-                                                              child:
-                                                                  const FaIcon(
-                                                                FontAwesomeIcons
-                                                                    .solidBookmark,
-                                                                color: Colors
-                                                                    .white,
-                                                                size: 16,
-                                                              ))
-                                                        ],
-                                                      )
-                                                    ],
-                                                  )),
-                                            )
-                                          ],
+                                              const SizedBox(
+                                                width: 10,
+                                              ),
+                                              Expanded(
+                                                child: SizedBox(
+                                                    height: 80,
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Text(
+                                                          detailAnime.episodes![
+                                                                  index]
+                                                              ['episodeName'],
+                                                          maxLines: 2,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                          style: const TextStyle(
+                                                              color:
+                                                                  Colors.white,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600),
+                                                        ),
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: [
+                                                            Row(
+                                                              children: [
+                                                                const FaIcon(
+                                                                  FontAwesomeIcons
+                                                                      .clock,
+                                                                  color: Colors
+                                                                      .grey,
+                                                                  size: 12,
+                                                                ),
+                                                                const SizedBox(
+                                                                  width: 4,
+                                                                ),
+                                                                Text(
+                                                                  Utils.convertTotalTime(
+                                                                      detailAnime
+                                                                              .episodes![index]
+                                                                          [
+                                                                          'totalTime']),
+                                                                  style: const TextStyle(
+                                                                      color: Colors
+                                                                          .grey),
+                                                                )
+                                                              ],
+                                                            ),
+                                                            ShaderMask(
+                                                                shaderCallback: (rect) =>
+                                                                    LinearGradient(
+                                                                      colors: Utils
+                                                                          .gradientColors,
+                                                                      begin: Alignment
+                                                                          .topCenter,
+                                                                    ).createShader(
+                                                                        rect),
+                                                                child:
+                                                                    const FaIcon(
+                                                                  FontAwesomeIcons
+                                                                      .solidBookmark,
+                                                                  color: Colors
+                                                                      .white,
+                                                                  size: 16,
+                                                                ))
+                                                          ],
+                                                        )
+                                                      ],
+                                                    )),
+                                              )
+                                            ],
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  );
-                                })),
-                              ),
-                              SuggestionByView(),
-                            ],
+                                    );
+                                  })),
+                                ),
+                                SuggestionByView(),
+                              ],
+                            ),
                           ),
                         ),
                       ),
