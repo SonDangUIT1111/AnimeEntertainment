@@ -1,6 +1,8 @@
+import 'package:anime_and_comic_entertainment/components/comic/TopRankingComic.dart';
 import 'package:anime_and_comic_entertainment/providers/user_provider.dart';
 import 'package:anime_and_comic_entertainment/services/animes_api.dart';
 import 'package:anime_and_comic_entertainment/services/auth_api.dart';
+import 'package:anime_and_comic_entertainment/services/comics_api.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -18,14 +20,11 @@ class _TestPageState extends State<TestPage> {
     return Scaffold(
       body: Container(
         width: double.infinity,
-        color: Colors.blue,
+        color: const Color(0xFF141414),
         child: Column(children: [
           ElevatedButton(
               onPressed: () async {
-                var userId =
-                    Provider.of<UserProvider>(context, listen: false).user.id;
-                print(userId == "" ? "not" : "oke");
-                if (userId == "") return;
+                await ComicsApi.getRankingTable(context);
                 // var userId =
                 //     Provider.of<UserProvider>(context, listen: false).user.id;
                 // if (userId == "") {
@@ -44,7 +43,7 @@ class _TestPageState extends State<TestPage> {
               onPressed: () async {
                 AuthApi.login(context, '+84979683590', 'Dangthaison@123');
               },
-              child: Text('login'))
+              child: Text('login')),
         ]),
       ),
     );

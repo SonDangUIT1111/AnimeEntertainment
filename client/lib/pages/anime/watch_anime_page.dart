@@ -907,23 +907,30 @@ class _WatchAnimePageState extends State<WatchAnimePage>
                                                                 )
                                                               ],
                                                             ),
-                                                            ShaderMask(
-                                                                shaderCallback: (rect) =>
-                                                                    LinearGradient(
-                                                                      colors: Utils
-                                                                          .gradientColors,
-                                                                      begin: Alignment
-                                                                          .topCenter,
-                                                                    ).createShader(
-                                                                        rect),
-                                                                child:
-                                                                    const FaIcon(
-                                                                  FontAwesomeIcons
-                                                                      .solidBookmark,
-                                                                  color: Colors
-                                                                      .white,
-                                                                  size: 16,
-                                                                ))
+                                                            Provider.of<UserProvider>(context, listen: false)
+                                                                            .user
+                                                                            .authentication[
+                                                                        'sessionToken'] !=
+                                                                    ""
+                                                                ? ShaderMask(
+                                                                    shaderCallback: (rect) =>
+                                                                        LinearGradient(
+                                                                          colors:
+                                                                              Utils.gradientColors,
+                                                                          begin:
+                                                                              Alignment.topCenter,
+                                                                        ).createShader(
+                                                                            rect),
+                                                                    child:
+                                                                        const FaIcon(
+                                                                      FontAwesomeIcons
+                                                                          .solidBookmark,
+                                                                      color: Colors
+                                                                          .white,
+                                                                      size: 16,
+                                                                    ))
+                                                                : const SizedBox
+                                                                    .shrink(),
                                                           ],
                                                         )
                                                       ],
