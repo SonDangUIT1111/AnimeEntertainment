@@ -1,3 +1,4 @@
+import 'package:anime_and_comic_entertainment/components/animes/WatchingHistoriesList.dart';
 import 'package:anime_and_comic_entertainment/components/comic/TopRankingComic.dart';
 import 'package:anime_and_comic_entertainment/providers/user_provider.dart';
 import 'package:anime_and_comic_entertainment/services/animes_api.dart';
@@ -17,14 +18,14 @@ class TestPage extends StatefulWidget {
 class _TestPageState extends State<TestPage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
+    return Scaffold(body: Consumer(builder: (context, watch, _) {
+      final user = Provider.of<UserProvider>(context).user;
+      return Container(
         width: double.infinity,
         color: const Color(0xFF141414),
         child: Column(children: [
           ElevatedButton(
               onPressed: () async {
-                await ComicsApi.getRankingTable(context);
                 // var userId =
                 //     Provider.of<UserProvider>(context, listen: false).user.id;
                 // if (userId == "") {
@@ -44,8 +45,31 @@ class _TestPageState extends State<TestPage> {
                 AuthApi.login(context, '+84979683590', 'Dangthaison@123');
               },
               child: Text('login')),
+          user.id != ""
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                      child: Text(
+                        "Bạn đang xem",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 160,
+                      child: WatchingHistoriesList(
+                        userId: user.id,
+                      ),
+                    ),
+                  ],
+                )
+              : SizedBox.shrink(),
         ]),
-      ),
-    );
+      );
+    }));
   }
 }
