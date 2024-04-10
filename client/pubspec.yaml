@@ -60,6 +60,9 @@ flutter:
     - assets/images/error_network.png
     - assets/images/donate1.png
     - assets/images/donate2.png
+    - assets/images/skycoin.png
+    - assets/images/donatebanner.png
+    - assets/images/loginbanner.png
     - assets/
   #   - images/a_dot_ham.jpeg
 

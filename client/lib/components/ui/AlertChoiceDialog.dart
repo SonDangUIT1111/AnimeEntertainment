@@ -2,11 +2,11 @@ import 'package:anime_and_comic_entertainment/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 
-class CustomAlertDialog extends StatelessWidget {
+class CustomAlertChoiceDialog extends StatelessWidget {
   final String content;
   final String title;
   final Function action;
-  const CustomAlertDialog(
+  const CustomAlertChoiceDialog(
       {super.key,
       required this.content,
       required this.title,
@@ -41,18 +41,29 @@ class CustomAlertDialog extends StatelessWidget {
       content: Text(content),
       actions: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            GFButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                action();
-              },
-              text: "OK",
-              color: const Color.fromARGB(255, 38, 213, 99),
-              shape: GFButtonShape.pills,
-              type: GFButtonType.outline2x,
-              size: GFSize.LARGE,
+            Expanded(
+              child: GFButton(
+                text: "Đăng xuất",
+                type: GFButtonType.outline,
+                color: Utils.primaryColor,
+                onPressed: () {
+                  action();
+                },
+              ),
+            ),
+            const SizedBox(
+              width: 10,
+            ),
+            Expanded(
+              child: GFButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                text: "Bỏ qua",
+                color: Utils.primaryColor,
+                type: GFButtonType.solid,
+              ),
             ),
           ],
         )
