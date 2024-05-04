@@ -263,74 +263,75 @@ export const getChapterOfComic: RequestHandler = async (req, res, next) => {
     ]);
 
     if (!comic) {
-      throw createHttpError(404, "comic not found");
+      throw createHttpError(404, "comic not found")
     }
     res.status(200).json(comic);
-  } catch (error) {
-    next(error);
   }
-};
-
+  catch (error) {
+    next(error)
+  }
+}
 
 export const getDetailComicById: RequestHandler = async (req, res, next) => {
-    const comicId = req.body.comicId;
-    try
-    {
-        if (!mongoose.isValidObjectId(comicId))
-        {
-            throw createHttpError(400, "Invalid comic id")
-        }
-        // Mỗi một comic có một field gọi là chapterList chứa id của các chapter 
-        const comic = await ComicsModel.aggregate([
+  const url = req.url;
+  const [, params] = url.split("?");
+  const parsedParams = qs.parse(params);
+  const comicId: string =
+    typeof parsedParams.comicId === "string" ? parsedParams.comicId : "0";
+  try {
+    if (!mongoose.isValidObjectId(comicId)) {
+      throw createHttpError(400, "Invalid comic id")
+    }
+    // Mỗi một comic có một field gọi là chapterList chứa id của các chapter 
+    const comic = await ComicsModel.aggregate([
+      {
+        $match: { _id: new mongoose.Types.ObjectId(comicId) }
+      },
+      {
+        $lookup: {
+          from: "comicchapters",
+          localField: "chapterList",
+          foreignField: "_id",
+          pipeline: [
             {
-                $match: { _id: new mongoose.Types.ObjectId(comicId)}
+              $addFields: {
+                likeCount: { $size: "$likes" },
+              },
             },
-            {
-                $lookup: {
-                  from: "comicchapters",
-                  localField: "chapterList",
-                  foreignField: "_id",
-                  pipeline: [
-                    {
-                      $addFields: {
-                        likeCount: { $size: "$likes" },
-                      },
-                    },
-                  ],
-                  as: "detailChapterList",
-                },
-              },
-              {
-                $lookup: {
-                  from: "genres",
-                  localField: "genres",
-                  foreignField: "_id",
-                  as: "genreNames",
-                },
-              },
-              {
-                $addFields: {
-                  totalViews: {
-                    $sum: "$detailChapterList.views",
-                  },
-                },
-              },
-              {
-                $addFields: {
-                  totalLikes: {
-                    $sum: "$detailChapterList.likeCount",
-                  },
-                },
-              },
-        ])
+          ],
+          as: "detailChapterList",
+        },
+      },
+      {
+        $lookup: {
+          from: "genres",
+          localField: "genres",
+          foreignField: "_id",
+          as: "genreNames",
+        },
+      },
+      {
+        $addFields: {
+          totalViews: {
+            $sum: "$detailChapterList.views",
+          },
+        },
+      },
+      {
+        $addFields: {
+          totalLikes: {
+            $sum: "$detailChapterList.likeCount",
+          },
+        },
+      },
+    ])
 
-        if (!comic) {
-            throw createHttpError(404, "comic not found")
-        }
-        res.status(200).json(comic);
+    if (!comic) {
+      throw createHttpError(404, "comic not found")
     }
-    catch (error)
-    {
-        next(error)
-    }
+    res.status(200).json(comic);
+  }
+  catch (error) {
+    next(error)
+  }
 }
