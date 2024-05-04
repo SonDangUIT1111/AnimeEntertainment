@@ -1,11 +1,13 @@
 // ignore_for_file: library_private_types_in_public_api
 
+import 'package:anime_and_comic_entertainment/pages/anime/anime_page.dart';
 import 'package:anime_and_comic_entertainment/pages/anime/watch_anime_page.dart';
-import 'package:anime_and_comic_entertainment/pages/home/no_internet_page.dart';
-import 'package:anime_and_comic_entertainment/pages/home/splash.dart';
-import 'package:anime_and_comic_entertainment/pages/profile/avatar_page.dart';
+import 'package:anime_and_comic_entertainment/pages/challenge/challenge_page.dart';
+import 'package:anime_and_comic_entertainment/pages/comic/comic_page.dart';
+import 'package:anime_and_comic_entertainment/pages/home/home_page.dart';
 import 'package:anime_and_comic_entertainment/pages/profile/profile_page.dart';
 import 'package:anime_and_comic_entertainment/pages/test.dart';
+import 'package:anime_and_comic_entertainment/providers/comic_detail_provider.dart';
 import 'package:anime_and_comic_entertainment/providers/mini_player_controller_provider.dart';
 import 'package:anime_and_comic_entertainment/providers/navigator_provider.dart';
 import 'package:anime_and_comic_entertainment/providers/user_provider.dart';
@@ -23,14 +25,9 @@ import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  Stripe.publishableKey = StripeApiKey.publishableKey;
-  await Stripe.instance.applySettings();
-  runApp(MultiProvider(providers: [
-    ChangeNotifierProvider(create: (context) => UserProvider()),
-    ChangeNotifierProvider(create: (context) => VideoProvider()),
-    ChangeNotifierProvider(create: (context) => MiniPlayerControllerProvider()),
-    ChangeNotifierProvider(create: (context) => NavigatorProvider())
-  ], child: const MyApp()));
+  // Stripe.publishableKey = StripeApiKey.publishableKey;
+  // await Stripe.instance.applySettings();
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -39,14 +36,60 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return RestartWidget(
-      child: const MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'skylark',
-          color: Color(0xFF141414),
-          home: MyHomePage(
-            title: '',
-          )),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => UserProvider()),
+        ChangeNotifierProvider(create: (context) => VideoProvider()),
+        ChangeNotifierProvider(
+            create: (context) => MiniPlayerControllerProvider()),
+        ChangeNotifierProvider(create: (context) => NavigatorProvider()),
+        ChangeNotifierProvider(create: (context) => ComisDetailProvider()),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.purple),
+          useMaterial3: true,
+        ),
+        title: 'skylark',
+        home: const TestPage(),
+      ),
+    );
+  }
+}
+
+// set up navigation here --------------------------------------------------------------- //
+
+class NavigationScreen extends StatefulWidget {
+  final int navIndex;
+
+  NavigationScreen(this.navIndex) : super();
+
+  @override
+  _NavigationScreenState createState() => _NavigationScreenState();
+}
+
+class _NavigationScreenState extends State<NavigationScreen>
+    with TickerProviderStateMixin {
+  @override
+  void initState() {
+    super.initState();
+  }
+  // right here ...
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Color(0xFF141414),
+      child: widget.navIndex == 0
+          ? HomePage()
+          : widget.navIndex == 1
+              ? ComicPage()
+              : widget.navIndex == 2
+                  ? AnimePage()
+                  : widget.navIndex == 3
+                      ? ChallengePage()
+                      : ProfilePage(),
     );
   }
 }
