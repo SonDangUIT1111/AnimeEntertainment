@@ -87,6 +87,7 @@ export const getNewEpisodeAnime: RequestHandler = async (req, res, next) => {
           coverImage: 1,
           episodeName: 1,
           "animeOwner.movieName": 1,
+          "animeOwner._id": 1,
           publicTime: 1,
         },
       },
@@ -317,6 +318,14 @@ export const getSomeTopViewEpisodes: RequestHandler = async (
 ) => {
   try {
     const animes = await AnimeEpisodeModel.aggregate([
+      {
+        $lookup: {
+          from: "animes",
+          localField: "_id",
+          foreignField: "episodes",
+          as: "movieOwner",
+        },
+      },
       { $sort: { views: -1 } },
       {
         $project: {
@@ -325,6 +334,7 @@ export const getSomeTopViewEpisodes: RequestHandler = async (
           episodeName: 1,
           totalTime: 1,
           views: 1,
+          "movieOwner._id": 1,
         },
       },
       { $limit: 12 },
@@ -612,7 +622,18 @@ export const getWatchingHistories: RequestHandler = async (req, res, next) => {
           from: "animeepisodes",
           localField: "histories.watchingMovie.episodeId",
           foreignField: "_id",
-          pipeline: [{ $skip: (page - 1) * limit }, { $limit: limit }],
+          pipeline: [
+            {
+              $lookup: {
+                from: "animes",
+                localField: "_id",
+                foreignField: "episodes",
+                as: "movieOwner",
+              },
+            },
+            { $skip: (page - 1) * limit },
+            { $limit: limit },
+          ],
           as: "detailHistories",
         },
       },
@@ -624,10 +645,53 @@ export const getWatchingHistories: RequestHandler = async (req, res, next) => {
           "detailHistories.coverImage": 1,
           "detailHistories.totalTime": 1,
           "detailHistories.position": 1,
+          "detailHistories.movieOwner._id": 1,
         },
       },
     ]);
     res.status(200).json(histories);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const searchAnimeAndEpisodes: RequestHandler = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const { query } = req.query;
+
+    // Validate query parameter
+    if (!query || typeof query !== "string") {
+      throw createHttpError(400, "Invalid search query");
+    }
+
+    // Construct regex pattern for partial word matching
+    const regexQuery = query
+      .split(" ")
+      .map((word) => `(?=.*${word})`)
+      .join("");
+
+    // Search for anime
+    const animeResults = await AnimesModel.find({
+      $or: [
+        { movieName: { $regex: regexQuery, $options: "i" } }, // Case-insensitive search by movie name
+        { publisher: { $regex: regexQuery, $options: "i" } }, // Case-insensitive search by publisher
+        // Add more fields to search as needed
+      ],
+    });
+
+    // Search for anime episodes
+    const episodeResults = await AnimeEpisodeModel.find({
+      $or: [
+        { episodeName: { $regex: regexQuery, $options: "i" } }, // Case-insensitive search by episode name
+        // Add more fields to search as needed
+      ],
+    });
+
+    res.status(200).json({ animeResults, episodeResults });
   } catch (error) {
     next(error);
   }

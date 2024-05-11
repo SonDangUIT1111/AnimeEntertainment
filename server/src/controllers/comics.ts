@@ -2,6 +2,7 @@ import { RequestHandler } from "express";
 import createHttpError from "http-errors";
 import mongoose from "mongoose";
 import ComicsModel from "../models/comics";
+import Comics from "../models/comics";
 import BannerModel from "../models/banner";
 import ComicChapterModel from "../models/comicChapter";
 import UserModel from "../models/user";
@@ -264,14 +265,13 @@ export const getChapterOfComic: RequestHandler = async (req, res, next) => {
     ]);
 
     if (!comic) {
-      throw createHttpError(404, "comic not found")
+      throw createHttpError(404, "comic not found");
     }
     res.status(200).json(comic);
+  } catch (error) {
+    next(error);
   }
-  catch (error) {
-    next(error)
-  }
-}
+};
 
 export const getDetailComicById: RequestHandler = async (req, res, next) => {
   const url = req.url;
@@ -281,12 +281,12 @@ export const getDetailComicById: RequestHandler = async (req, res, next) => {
     typeof parsedParams.comicId === "string" ? parsedParams.comicId : "0";
   try {
     if (!mongoose.isValidObjectId(comicId)) {
-      throw createHttpError(400, "Invalid comic id")
+      throw createHttpError(400, "Invalid comic id");
     }
-    // Mỗi một comic có một field gọi là chapterList chứa id của các chapter 
+    // Mỗi một comic có một field gọi là chapterList chứa id của các chapter
     const comic = await ComicsModel.aggregate([
       {
-        $match: { _id: new mongoose.Types.ObjectId(comicId) }
+        $match: { _id: new mongoose.Types.ObjectId(comicId) },
       },
       {
         $lookup: {
@@ -325,17 +325,16 @@ export const getDetailComicById: RequestHandler = async (req, res, next) => {
           },
         },
       },
-    ])
+    ]);
 
     if (!comic) {
-      throw createHttpError(404, "comic not found")
+      throw createHttpError(404, "comic not found");
     }
     res.status(200).json(comic);
+  } catch (error) {
+    next(error);
   }
-  catch (error) {
-    next(error)
-  }
-}
+};
 
 export const updateUserSaveChapter: RequestHandler = async (req, res, next) => {
   try {
@@ -361,6 +360,37 @@ export const updateUserSaveChapter: RequestHandler = async (req, res, next) => {
   }
 };
 
+// Define the searchComics controller function
+export const searchComics: RequestHandler = async (req, res, next) => {
+  // Extract the search term from the query string
+  const { query } = req.query;
+
+  try {
+    // Construct the MongoDB query object to search across multiple fields
+    const comics: (typeof Comics)[] = await ComicsModel.find({
+      $or: [
+        { comicName: { $regex: new RegExp(query as string, "i") } },
+        { publisher: { $regex: new RegExp(query as string, "i") } },
+        { author: { $regex: new RegExp(query as string, "i") } },
+        { artist: { $regex: new RegExp(query as string, "i") } },
+      ],
+    });
+
+    // Check if any comics were found
+    if (!comics.length) {
+      throw createHttpError(
+        404,
+        "No comics found matching the search criteria"
+      );
+    }
+
+    // Return the search results as a JSON response
+    res.status(200).json(comics);
+  } catch (error) {
+    // Pass any errors to the error handling middleware
+    next(error);
+  }
+};
 export const checkUserHasLikeOrSaveChapter: RequestHandler = async (
   req,
   res,
@@ -487,12 +517,72 @@ export const updateUserHistoryHadSeenChapter: RequestHandler = async (
       const indexOfItem = userInfo?.histories?.readingComic.indexOf(check);
       if (indexOfItem !== undefined) {
         userInfo?.histories?.readingComic.splice(indexOfItem, 1, {
-          chapterId: new mongoose.Types.ObjectId(chapterId)
+          chapterId: new mongoose.Types.ObjectId(chapterId),
         });
       }
     }
     await userInfo?.save();
     res.status(200).json(userInfo);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getComicChapterComments: RequestHandler = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const url = req.url;
+    const [, params] = url.split("?");
+    const parsedParams = qs.parse(params);
+    const chapterId =
+      typeof parsedParams.chapterId === "string" ? parsedParams.chapterId : "";
+
+    var chapter = await ComicChapterModel.findById(chapterId).select(
+      "comments"
+    );
+    if (!chapter) {
+      return res.sendStatus(400);
+    }
+
+    return res.status(200).json(chapter.comments).end();
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const addRootChapterComments: RequestHandler = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const { chapterId, userId, content } = req.body;
+    var chapter = await ComicChapterModel.findById(chapterId);
+    console.log(chapter);
+    if (!chapter) {
+      return res.sendStatus(400);
+    }
+
+    var user = await UserModel.findById(userId);
+    if (!user) {
+      return res.sendStatus(400);
+    }
+
+    chapter.comments.push({
+      _id: new mongoose.Types.ObjectId(),
+      userId: new mongoose.Types.ObjectId(userId),
+      likes: new mongoose.Types.Array(),
+      replies: new mongoose.Types.Array(),
+      content: content,
+      avatar: user.avatar,
+      userName: user.username,
+    });
+
+    await chapter?.save();
+    return res.status(200).json(chapter).end();
   } catch (error) {
     next(error);
   }

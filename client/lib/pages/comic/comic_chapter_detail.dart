@@ -4,6 +4,7 @@ import 'package:anime_and_comic_entertainment/model/comics.dart';
 import 'package:anime_and_comic_entertainment/pages/auth/login.dart';
 import 'package:anime_and_comic_entertainment/pages/comic/comic_chapter_comment.dart';
 import 'package:anime_and_comic_entertainment/providers/comic_detail_provider.dart';
+import 'package:anime_and_comic_entertainment/providers/navigator_provider.dart';
 import 'package:anime_and_comic_entertainment/providers/user_provider.dart';
 import 'package:anime_and_comic_entertainment/services/comics_api.dart';
 import 'package:anime_and_comic_entertainment/utils/utils.dart';
@@ -160,7 +161,7 @@ class _ComicChapterDetailState extends State<ComicChapterDetail> {
             valueColor: AlwaysStoppedAnimation<Color>(Utils.primaryColor),
           ),
           SizedBox(
-            height: MediaQuery.of(context).size.height - 128,
+            height: MediaQuery.of(context).size.height - 112,
             child: ListView.builder(
               controller: _scrollController,
               itemCount: contentLength,
@@ -207,10 +208,9 @@ class _ComicChapterDetailState extends State<ComicChapterDetail> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) =>
-                                      const ComicChapterComment(
-                                    comicId: "65ec601305c5cb2ad67cfb37",
-                                    chapterIndex: 1,
+                                  builder: (context) => ComicChapterComment(
+                                    chapterId: widget.comic
+                                        .chapterList![widget.index]['_id'],
                                   ),
                                 ),
                               );
