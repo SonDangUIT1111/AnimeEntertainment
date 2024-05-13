@@ -2,7 +2,9 @@
 
 import 'package:anime_and_comic_entertainment/pages/anime/watch_anime_page.dart';
 import 'package:anime_and_comic_entertainment/pages/challenge/challenge_test_result_page.dart';
+import 'package:anime_and_comic_entertainment/pages/comic/comic_detail.dart';
 import 'package:anime_and_comic_entertainment/pages/home/no_internet_page.dart';
+import 'package:anime_and_comic_entertainment/pages/home/splash.dart';
 import 'package:anime_and_comic_entertainment/pages/profile/avatar_page.dart';
 import 'package:anime_and_comic_entertainment/pages/profile/profile_page.dart';
 import 'package:anime_and_comic_entertainment/pages/test.dart';
@@ -10,6 +12,7 @@ import 'package:anime_and_comic_entertainment/providers/mini_player_controller_p
 import 'package:anime_and_comic_entertainment/providers/navigator_provider.dart';
 import 'package:anime_and_comic_entertainment/providers/user_provider.dart';
 import 'package:anime_and_comic_entertainment/providers/video_provider.dart';
+import 'package:anime_and_comic_entertainment/providers/comic_detail_provider.dart';
 import 'package:anime_and_comic_entertainment/tab_navigator.dart';
 import 'package:anime_and_comic_entertainment/utils/apiKey.dart';
 import 'package:anime_and_comic_entertainment/utils/utils.dart';
@@ -24,13 +27,14 @@ import 'package:anime_and_comic_entertainment/pages/challenge/challenge_test_pag
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  Stripe.publishableKey = StripeApiKey.publishableKey;
+  Stripe.publishableKey = KhoaStripeApiKey.stripePublicKey;
   await Stripe.instance.applySettings();
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (context) => UserProvider()),
     ChangeNotifierProvider(create: (context) => VideoProvider()),
     ChangeNotifierProvider(create: (context) => MiniPlayerControllerProvider()),
-    ChangeNotifierProvider(create: (context) => NavigatorProvider())
+    ChangeNotifierProvider(create: (context) => NavigatorProvider()),
+    ChangeNotifierProvider(create: (context) => ComicChapterProvider()),
   ], child: const MyApp()));
 }
 
@@ -40,14 +44,13 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return RestartWidget(
-      child: const MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'skylark',
-          color: Color(0xFF141414),
-          home: MyHomePage(
-            title: '',
-          )),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'skylark',
+      color: Color(0xFF141414),
+      home: DetailComicPage(
+        comicId: "65ec601305c5cb2ad67cfb37",
+      ),
     );
   }
 }
