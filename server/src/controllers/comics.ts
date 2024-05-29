@@ -7,6 +7,7 @@ import BannerModel from "../models/banner";
 import ComicChapterModel from "../models/comicChapter";
 import UserModel from "../models/user";
 import * as admin from "firebase-admin";
+import * as admin from "firebase-admin";
 import ComicAlbumModel from "../models/comicAlbum";
 import qs from "qs";
 
@@ -377,6 +378,27 @@ export const getComicChapter: RequestHandler = async (req, res, next) => {
   }
 };
 
+export const getComicChapter: RequestHandler = async (req, res, next) => {
+  const url = req.url;
+  const [, params] = url.split("?");
+  const parsedParams = qs.parse(params);
+  const chapterId: string =
+    typeof parsedParams.chapterId === "string" ? parsedParams.chapterId : "0";
+  try {
+    if (!mongoose.isValidObjectId(chapterId)) {
+      throw createHttpError(400, "Invalid comic id");
+    }
+    // Mỗi một comic có một field gọi là chapterList chứa id của các chapter
+    const chapter = await ComicChapterModel.findById(chapterId);
+    if (!chapter) {
+      throw createHttpError(404, "comic not found");
+    }
+    res.status(200).json(chapter);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const updateUserSaveChapter: RequestHandler = async (req, res, next) => {
   try {
     const { chapterId, userId } = req.body;
@@ -433,73 +455,474 @@ export const searchComics: RequestHandler = async (req, res, next) => {
   }
 };
 
-export const getReadingHistories: RequestHandler = async (req, res, next) => {
+export const addChildChapterComments: RequestHandler = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const { chapterId, userId, commentId, content } = req.body;
+    var chapter = await ComicChapterModel.findById(chapterId);
+    if (!chapter) {
+      return res.sendStatus(400);
+    }
+
+    var user = await UserModel.findById(userId);
+    if (!user) {
+      return res.sendStatus(400);
+    }
+
+    chapter.comments.forEach(async (item, index) => {
+      if (item._id.toString() === commentId) {
+        item.replies.push({
+          _id: new mongoose.Types.ObjectId(),
+          userId: new mongoose.Types.ObjectId(userId),
+          likes: new mongoose.Types.Array(),
+          content: content,
+          avatar: user?.avatar,
+          userName: user?.username,
+        });
+        const changed = await ComicChapterModel.findByIdAndUpdate(
+          chapterId,
+          chapter!
+        );
+        return res.status(200).json(changed).end();
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+export const checkValidCommentContent: RequestHandler = async (
+  req,
+  res,
+  next
+) => {
   const url = req.url;
   const [, params] = url.split("?");
   const parsedParams = qs.parse(params);
-  const page = parseInt(
-    typeof parsedParams.page === "string" ? parsedParams.page : "0"
-  );
-  const limit = parseInt(
-    typeof parsedParams.limit === "string" ? parsedParams.limit : "0"
-  );
+  var content =
+    typeof parsedParams.content === "string" ? parsedParams.content : "";
+  content = content.toLowerCase();
+  const sensitiveWords = [
+    "fuck",
+    "dick",
+    "pussy",
+    "fucker",
+    "cặc",
+    "lồn",
+    "loz",
+    "cak",
+    "địt",
+    "đụ",
+    "cc",
+  ];
+  try {
+    var isValid = true;
+    if (content.includes("https") || content.includes("http")) {
+      isValid = false;
+    }
+    sensitiveWords.forEach((word) => {
+      if (content.includes(word)) {
+        isValid = false;
+      }
+    });
+    res.status(200).json(isValid === undefined ? {} : isValid);
+  } catch (error) {
+    next(error);
+  }
+};
+export const checkUserBanned: RequestHandler = async (req, res, next) => {
+  const url = req.url;
+  const [, params] = url.split("?");
+  const parsedParams = qs.parse(params);
   const userId =
     typeof parsedParams.userId === "string" ? parsedParams.userId : "";
+  try {
+    var user = await UserModel.findById(userId);
+    if (!user) {
+      return res.status(400);
+    }
+    if (
+      user.accessCommentDate === null ||
+      user.accessCommentDate === undefined
+    ) {
+      return res.status(200).json("2020");
+    }
+    const accessDate = user?.accessCommentDate;
+    if (
+      accessDate !== null &&
+      accessDate !== undefined &&
+      accessDate <= new Date()
+    ) {
+      return res.status(200).json("2020");
+    }
+    res.status(200).json(user?.accessCommentDate).end();
+  } catch (error) {
+    next(error);
+  }
+};
+export const banUser: RequestHandler = async (req, res, next) => {
+  try {
+    const { userId } = req.body;
+    var user = await UserModel.findById(userId);
+    if (!user) {
+      return res.sendStatus(400);
+    }
+    var newAccessDate = new Date();
+    newAccessDate.setDate(newAccessDate.getDate() + 3);
+    user.accessCommentDate = newAccessDate;
+    await user?.save();
+    return res.status(200).json(user.accessCommentDate).end();
+  } catch (error) {
+    next(error);
+  }
+};
+export const updateUserLikeParentComment: RequestHandler = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const { chapterId, userId, commentId } = req.body;
+    var chapter = await ComicChapterModel.findById(chapterId);
+    if (!chapter) {
+      return res.sendStatus(400);
+    }
+
+    chapter.comments.forEach(async (item) => {
+      if (item._id.toString() === commentId) {
+        const copyList = item.likes.filter(
+          (item: mongoose.Types.ObjectId) => item.toString() !== userId
+        );
+        if (copyList.length === item.likes.length) {
+          item.likes.push(new mongoose.Types.ObjectId(userId));
+          const changed = await ComicChapterModel.findByIdAndUpdate(
+            chapterId,
+            chapter!
+          );
+          return res.status(200).json(changed).end();
+        } else {
+          item.likes = copyList;
+          const changed = await ComicChapterModel.findByIdAndUpdate(
+            chapterId,
+            chapter!
+          );
+          return res.status(200).json(changed).end();
+        }
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateUserLikeChildComment: RequestHandler = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const { chapterId, userId, commentId, commentChildId } = req.body;
+    var chapter = await ComicChapterModel.findById(chapterId);
+    if (!chapter) {
+      return res.sendStatus(400);
+    }
+    console.log(commentId, commentChildId, userId);
+    chapter.comments.forEach((item) => {
+      if (item._id.toString() === commentId) {
+        item.replies.forEach(async (item: any) => {
+          if (item._id.toString() === commentChildId) {
+            const copyList = item.likes.filter(
+              (item: mongoose.Types.ObjectId) => item.toString() !== userId
+            );
+            if (copyList.length === item.likes.length) {
+              item.likes.push(new mongoose.Types.ObjectId(userId));
+              const changed = await ComicChapterModel.findByIdAndUpdate(
+                chapterId,
+                chapter!
+              );
+              return res.status(200).json(changed).end();
+            } else {
+              item.likes = copyList;
+              const changed = await ComicChapterModel.findByIdAndUpdate(
+                chapterId,
+                chapter!
+              );
+              return res.status(200).json(changed).end();
+            }
+          }
+        });
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+export const updateNotiComment: RequestHandler = async (req, res, next) => {
+  try {
+    const { userId, chapterId } = req.body;
+
+    var user = await UserModel.findById(userId);
+    if (!user) {
+      return res.sendStatus(400);
+    }
+
+    user.notifications.push({
+      sourceId: new mongoose.Types.ObjectId(chapterId),
+      type: "comment",
+      content: "Ai đó đã trả lời bình luận của bạn",
+    });
+
+    await user?.save();
+    return res.status(200).json(user.accessCommentDate).end();
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const searchComicByGenres: RequestHandler = async (req, res, next) => {
+  const url = req.url;
+  const [, params] = url.split("?");
+  const parsedParams = qs.parse(params);
+  const genreId =
+    typeof parsedParams.genreId === "string" ? parsedParams.genreId : "";
+  try {
+    if (!mongoose.isValidObjectId(genreId)) {
+      throw createHttpError(400, "Invalid user id");
+    }
+    const animes = await ComicsModel.find({
+      genres: new mongoose.Types.ObjectId(genreId),
+    });
+    res.status(200).json(animes);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const testComment: RequestHandler = async (req, res, next) => {
+  try {
+    const { chapterId, userId, commentId, content } = req.body;
+    var chapter = await ComicChapterModel.findById(chapterId);
+    if (!chapter) {
+      return res.sendStatus(400);
+    }
+
+    var user = await UserModel.findById(userId);
+    if (!user) {
+      return res.sendStatus(400);
+    }
+
+    chapter.comments.forEach(async (item, index) => {
+      if (item._id.toString() === commentId) {
+        item.replies.push({
+          _id: new mongoose.Types.ObjectId(),
+          userId: new mongoose.Types.ObjectId(userId),
+          likes: new mongoose.Types.Array(),
+          content: content,
+          avatar: user?.avatar,
+          userName: user?.username,
+        });
+        const changed = await ComicChapterModel.findByIdAndUpdate(
+          chapterId,
+          chapter!
+        );
+        return res.status(200).json(changed).end();
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const sendPushNoti: RequestHandler = async (req, res, next) => {
+  try {
+    try {
+      var serviceAccount = require("../../pushnotiflutter-95328-firebase-adminsdk-rdiar-9008d7c00f.json");
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+      });
+    } catch {}
+
+    const token =
+      "fYxl0HrhQGWk50NtCOKqq6:APA91bHMWUF391_XNFlIlBQcCzPK-1qwofwwZAj0pfE072_3q5ZhbzGOIgmV8i-nk-lOrLHoYPVo6rL7MjFXn0XttdBFwn5-rh3Wad8dfy7xFXfcN5MNRdmaUb0PpOJakDZvqLvdXGAt";
+
+    const message = {
+      notification: {
+        title: req.body.title,
+        body: req.body.body,
+      },
+      token: token, // This is the device token
+    };
+
+    // Send a message to the device corresponding to the provided
+    // registration token.
+    admin
+      .messaging()
+      .send(message)
+      .then((response) => {
+        // Response is a message ID string.
+        console.log("Successfully sent message:", response);
+        res.send("Successfully sent message: " + response);
+      })
+      .catch((error) => {
+        console.log("Error sending message:", error);
+        res.send("Error sending message: " + error);
+      });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const checkUserHasLikeOrSaveChapter: RequestHandler = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const url = req.url;
+    const [, params] = url.split("?");
+    const parsedParams = qs.parse(params);
+    const chapterId =
+      typeof parsedParams.chapterId === "string" ? parsedParams.chapterId : "";
+    const userId =
+      typeof parsedParams.userId === "string" ? parsedParams.userId : "";
+    // check like
+    var chapter = await ComicChapterModel.findById(chapterId);
+    if (!chapter) {
+      return res.sendStatus(400);
+    }
+    var check = chapter.likes.filter((item) => item.toString() === userId);
+    // check bookmark
+    var user = await UserModel.findById(userId);
+    if (!user) {
+      return res.sendStatus(400);
+    }
+    var checkSave = user.bookmarkList!["comic"].filter(
+      (item) => item.toString() === chapterId
+    );
+    return res
+      .status(200)
+      .json({
+        like: check.length === 0 ? false : true,
+        bookmark: checkSave.length === 0 ? false : true,
+      })
+      .end();
+  } catch (error) {
+    next(error);
+  }
+};
+export const updateChapterView: RequestHandler = async (req, res, next) => {
+  try {
+    const chapterId = req.body.chapterId;
+    var chapter = await ComicChapterModel.findById(chapterId);
+    if (!chapter) {
+      return res.sendStatus(400);
+    }
+    chapter.views = chapter.views! + 1;
+    await chapter?.save();
+    return res.status(200).json(chapter).end();
+  } catch (error) {
+    next(error);
+  }
+};
+export const updateUserLikeChapter: RequestHandler = async (req, res, next) => {
+  try {
+    const { chapterId, userId } = req.body;
+    var chapter = await ComicChapterModel.findById(chapterId);
+    if (!chapter) {
+      return res.sendStatus(400);
+    }
+    var check = chapter.likes.filter((item) => item.toString() === userId);
+    if (check.length === 0) {
+      chapter.likes.push(new mongoose.Types.ObjectId(userId));
+    } else {
+      chapter.likes = chapter.likes.filter(
+        (item) => item.toString() !== userId
+      );
+    }
+    await chapter?.save();
+    return res.status(200).json(chapter).end();
+  } catch (error) {
+    next(error);
+  }
+};
+export const checkUserHistoryHadSeenChapter: RequestHandler = async (
+  req,
+  res,
+  next
+) => {
+  const url = req.url;
+  const [, params] = url.split("?");
+  const parsedParams = qs.parse(params);
+  const chapterId =
+    typeof parsedParams.chapterId === "string" ? parsedParams.chapterId : "";
+  const userId =
+    typeof parsedParams.userId === "string" ? parsedParams.userId : "";
+  try {
+    if (!mongoose.isValidObjectId(chapterId)) {
+      throw createHttpError(400, "Invalid chapter id");
+    }
+    const userInfo = await UserModel.findById(userId).select("histories");
+    var check = userInfo?.histories?.readingComic.find(
+      (item) => item.chapterId.toString() === chapterId
+    );
+    res.status(200).json(check === undefined ? {} : check);
+  } catch (error) {
+    next(error);
+  }
+};
+export const updateUserHistoryHadSeenChapter: RequestHandler = async (
+  req,
+  res,
+  next
+) => {
+  const chapterId = req.body.chapterId;
+  const userId = req.body.userId;
   try {
     if (!mongoose.isValidObjectId(userId)) {
       throw createHttpError(400, "Invalid user id");
     }
-    const histories = await UserModel.aggregate([
-      {
-        $match: { _id: new mongoose.Types.ObjectId(userId) },
-      },
-      {
-        $project: { histories: 1 },
-      },
-      {
-        $lookup: {
-          from: "comicchapters",
-          localField: "histories.readingComic.chapterId",
-          foreignField: "_id",
-          pipeline: [
-            {
-              $lookup: {
-                from: "comics",
-                localField: "_id",
-                foreignField: "chapterList",
-                pipeline: [
-                  {
-                    $lookup: {
-                      from: "comicchapters",
-                      localField: "chapterList",
-                      foreignField: "_id",
-                      pipeline: [],
-                      as: "detailChapterList",
-                    },
-                  },
-                ],
-                as: "comicOwner",
-              },
-            },
-            { $skip: (page - 1) * limit },
-            { $limit: limit },
-          ],
-          as: "detailHistories",
-        },
-      },
-      {
-        $project: {
-          histories: 1,
-          "detailHistories._id": 1,
-          "detailHistories.chapterName": 1,
-          "detailHistories.coverImage": 1,
-          "detailHistories.comicOwner._id": 1,
-          "detailHistories.comicOwner.chapterList": 1,
-          "detailHistories.comicOwner.detailChapterList": 1,
-        },
-      },
-    ]);
-    res.status(200).json(histories);
+    const userInfo = await UserModel.findById(userId).select("histories");
+    var check = userInfo?.histories?.readingComic.find(
+      (item) => item.chapterId.toString() === chapterId
+    );
+    if (check === undefined) {
+      userInfo?.histories?.readingComic.push({
+        chapterId: new mongoose.Types.ObjectId(chapterId),
+      });
+    } else {
+      const indexOfItem = userInfo?.histories?.readingComic.indexOf(check);
+      if (indexOfItem !== undefined) {
+        userInfo?.histories?.readingComic.splice(indexOfItem, 1, {
+          chapterId: new mongoose.Types.ObjectId(chapterId),
+        });
+      }
+    }
+    await userInfo?.save();
+    res.status(200).json(userInfo);
+  } catch (error) {
+    next(error);
+  }
+};
+export const getComicChapterComments: RequestHandler = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const url = req.url;
+    const [, params] = url.split("?");
+    const parsedParams = qs.parse(params);
+    const chapterId =
+      typeof parsedParams.chapterId === "string" ? parsedParams.chapterId : "";
+    var chapter = await ComicChapterModel.findById(chapterId).select(
+      "comments"
+    );
+    if (!chapter) {
+      return res.sendStatus(400);
+    }
+    return res.status(200).json(chapter.comments).end();
   } catch (error) {
     next(error);
   }

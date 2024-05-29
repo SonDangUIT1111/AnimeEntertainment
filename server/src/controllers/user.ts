@@ -2,8 +2,10 @@ import { RequestHandler } from "express";
 import createHttpError from "http-errors";
 import mongoose from "mongoose";
 import * as admin from 'firebase-admin';
+import * as admin from 'firebase-admin';
 import AvatarModel from "../models/avatars";
 import UserModel from "../models/user";
+import qs from "qs";
 import qs from "qs";
 import ComicsModel from "../models/comics";
 import AnimeModel from "../models/anime";
@@ -142,7 +144,9 @@ export const sendPushNoti: RequestHandler = async (
 export const uploadUsername: RequestHandler = async (req, res, next) => {
   try {
     const { userId, username } = req.body;
+    const { userId, username } = req.body;
     var user = await UserModel.findById(userId);
+    if (!user) {
     if (!user) {
       return res.sendStatus(400);
     }
@@ -152,6 +156,7 @@ export const uploadUsername: RequestHandler = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
 };
 
 export const getBookmarkList: RequestHandler = async (req, res, next) => {
@@ -163,7 +168,15 @@ export const getBookmarkList: RequestHandler = async (req, res, next) => {
     // if (!user) {
     //   return res.sendStatus(400);
     // }
+    // const user = await UserModel.findById(userId);
+    // if (!user) {
+    //   return res.sendStatus(400);
+    // }
 
+    // // Check if bookmarkList exists in user document
+    // if (!user.bookmarkList) {
+    //   return res.status(200).json({ comics: [], animes: [] });
+    // }
     // // Check if bookmarkList exists in user document
     // if (!user.bookmarkList) {
     //   return res.status(200).json({ comics: [], animes: [] });
@@ -172,11 +185,69 @@ export const getBookmarkList: RequestHandler = async (req, res, next) => {
     // // Get bookmarked comics
     // const comicsIds = user.bookmarkList.comic || [];
     // const comics = await ComicsModel.find({ _id: { $in: comicsIds } });
+    // // Get bookmarked comics
+    // const comicsIds = user.bookmarkList.comic || [];
+    // const comics = await ComicsModel.find({ _id: { $in: comicsIds } });
 
     // // Get bookmarked animes
     // const animesIds = user.bookmarkList.movies || [];
     // const animes = await AnimeModel.find({ _id: { $in: animesIds } });
+    // // Get bookmarked animes
+    // const animesIds = user.bookmarkList.movies || [];
+    // const animes = await AnimeModel.find({ _id: { $in: animesIds } });
 
+    // return res.status(200).json({ comics, animes });
+
+    const user = await UserModel.aggregate([
+      {
+        $match: { _id: new mongoose.Types.ObjectId(userId?.toString()) },
+      },
+      {
+        $lookup: {
+          from: "comics",
+          localField: "bookmarkList.comic",
+          foreignField: "_id",
+          pipeline: [
+            {
+              $lookup: {
+                from: "genres",
+                localField: "genres",
+                foreignField: "_id",
+                pipeline: [],
+                as: "genreNames",
+              },
+            },
+          ],
+          as: "comics",
+        },
+      },
+      {
+        $lookup: {
+          from: "animes",
+          localField: "bookmarkList.movies",
+          foreignField: "_id",
+          pipeline: [
+            {
+              $lookup: {
+                from: "genres",
+                localField: "genres",
+                foreignField: "_id",
+                pipeline: [],
+                as: "genreNames",
+              },
+            },
+          ],
+          as: "animes",
+        },
+      },
+      {
+        $project: {
+          comics: 1,
+          animes: 1,
+        },
+      },
+    ]);
+    return res.status(200).json(user);
     // return res.status(200).json({ comics, animes });
 
     const user = await UserModel.aggregate([
