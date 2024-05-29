@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class UserProvider extends ChangeNotifier {
   User _user = User(
-      id: '65f709463fafb1d0bdce1bb0',
+      id: '',
       paymentHistories: [],
       authentication: {"password": "", "salt": "", "sessionToken": ""},
       bookmarkList: {},
@@ -17,7 +17,8 @@ class UserProvider extends ChangeNotifier {
         "received": [],
         "finalTime": DateTime.now(),
         "hasReceivedDailyGift": false,
-      });
+      },
+      challenges: []);
 
   User get user => _user;
   void setUserToken(String token) {
@@ -86,6 +87,11 @@ class UserProvider extends ChangeNotifier {
       "finalTime": DateTime.parse(date),
       "hasReceivedDailyGift": hasReceivedDailyGift
     };
+    notifyListeners();
+  }
+
+  void setChallenges(List value) {
+    _user.challenges = value;
     notifyListeners();
   }
 

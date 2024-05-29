@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:anime_and_comic_entertainment/components/challenge/AnswerOption.dart';
+import 'package:anime_and_comic_entertainment/components/ui/ReceivedCoinDialog.dart';
 import 'package:anime_and_comic_entertainment/model/challenges.dart';
 import 'package:anime_and_comic_entertainment/pages/challenge/challenge_test_result_page.dart';
 import 'package:anime_and_comic_entertainment/providers/user_provider.dart';
@@ -11,6 +12,8 @@ import 'package:getwidget/components/button/gf_button.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:getwidget/types/gf_button_type.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shimmer/shimmer.dart';
 
 class ChallengeTest extends StatefulWidget {
   const ChallengeTest({Key? key}) : super(key: key);
@@ -20,7 +23,7 @@ class ChallengeTest extends StatefulWidget {
 }
 
 class _ChallengeTestState extends State<ChallengeTest> {
-  //Define data
+  // Define data
   List<ChallengeQuestion> _questions = [];
   int _currentQuestionIndex = 0;
   final Map<int, int?> _userAnswers = {};
@@ -63,6 +66,8 @@ class _ChallengeTestState extends State<ChallengeTest> {
   }
 
   Future<void> _fetchQuestions() async {
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 2));
     var result = await ChallengesApi.getChallengesQuestion(context);
     setState(() {
       _questions = result;
@@ -74,14 +79,6 @@ class _ChallengeTestState extends State<ChallengeTest> {
       if (_currentQuestionIndex < _questions.length - 1) {
         _currentQuestionIndex++;
         _answerSelected = false; // Reset answer selection for next question
-      }
-    });
-  }
-
-  void _previousQuestion() {
-    setState(() {
-      if (_currentQuestionIndex > 0) {
-        _currentQuestionIndex--;
       }
     });
   }
@@ -113,7 +110,7 @@ class _ChallengeTestState extends State<ChallengeTest> {
         } else {
           isCorrect.add(false);
         }
-        userAnswers.add(_questions[i].answers[userAnswerIndex].content);
+        userAnswers.add(_questions[i].answers[userAnswerIndex]);
       }
     }
 
@@ -127,13 +124,22 @@ class _ChallengeTestState extends State<ChallengeTest> {
     // Ensure total points don't exceed 1000
     int score = totalPoints > 1000 ? 1000 : totalPoints;
 
-    //Push user result to database
+    // Push user result to database
     ChallengesApi.uploadUsersChallengesPoint(
       userId: userId,
-      point: totalPoints,
+      point: score,
       date: DateTime.now(),
       remainingTime: _timerDurationInSeconds,
     );
+
+    var setUserProvider = Provider.of<UserProvider>(context, listen: false);
+
+    setUserProvider.setChallenges([
+      {"date": DateTime.now(), "point": score, "time": _timerDurationInSeconds}
+    ]);
+
+    setUserProvider
+        .setCoinPoint(setUserProvider.user.coinPoint + (score / 10).ceil());
 
     // Navigate to result page and pass data
     Navigator.pushReplacement(
@@ -152,8 +158,9 @@ class _ChallengeTestState extends State<ChallengeTest> {
   Widget build(BuildContext context) {
     if (_questions.isEmpty) {
       return const Scaffold(
+        backgroundColor: Color(0xFF141414),
         body: Center(
-          child: CircularProgressIndicator(),
+          child: GFLoader(type: GFLoaderType.circle),
         ),
       );
     }
@@ -175,14 +182,7 @@ class _ChallengeTestState extends State<ChallengeTest> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  "Thử thách",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                const SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -191,7 +191,7 @@ class _ChallengeTestState extends State<ChallengeTest> {
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
-                        fontWeight: FontWeight.normal,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     Text(
@@ -215,7 +215,7 @@ class _ChallengeTestState extends State<ChallengeTest> {
                             "Thời gian thêm thưởng",
                             style: TextStyle(
                               color: Colors.grey[500],
-                              fontSize: 14,
+                              fontSize: 13,
                               fontWeight: FontWeight.normal,
                             ),
                           ),
@@ -234,18 +234,28 @@ class _ChallengeTestState extends State<ChallengeTest> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(20.0, 0, 20, 20),
+            padding: const EdgeInsets.fromLTRB(20.0, 0, 20, 10),
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  question.mediaUrl,
+                child: CachedNetworkImage(
+                  imageUrl: question.mediaUrl,
                   height: 200,
                   width: 200,
                   fit: BoxFit.fill,
+                  placeholder: (context, url) => Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child: Container(
+                      height: 200,
+                      width: 200,
+                      color: Colors.white,
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => const Icon(Icons.error),
                 ),
               ),
             ),
@@ -257,7 +267,7 @@ class _ChallengeTestState extends State<ChallengeTest> {
               question.questionName,
               style: const TextStyle(
                   color: Colors.white,
-                  fontWeight: FontWeight.w400,
+                  fontWeight: FontWeight.w500,
                   fontSize: 16),
             ),
           ),
@@ -273,7 +283,7 @@ class _ChallengeTestState extends State<ChallengeTest> {
                       GestureDetector(
                         onTap: () => _selectAnswer(i),
                         child: AnswerOption(
-                          text: question.answers[i].content,
+                          text: question.answers[i],
                           color: _userAnswers[_currentQuestionIndex] == i
                               ? Utils.primaryColor
                               : i == 0
@@ -288,7 +298,7 @@ class _ChallengeTestState extends State<ChallengeTest> {
                         GestureDetector(
                           onTap: () => _selectAnswer(i + 1),
                           child: AnswerOption(
-                            text: question.answers[i + 1].content,
+                            text: question.answers[i + 1],
                             color: _userAnswers[_currentQuestionIndex] == i + 1
                                 ? Utils.primaryColor
                                 : i == 0
@@ -311,23 +321,6 @@ class _ChallengeTestState extends State<ChallengeTest> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _currentQuestionIndex != 0
-                    ? Expanded(
-                        child: GFButton(
-                            onPressed: _previousQuestion,
-                            color: const Color(0xFFFB6F92),
-                            text: "Trở lại",
-                            type: GFButtonType.solid,
-                            textStyle: const TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.w500),
-                            shape: GFButtonShape.pills,
-                            size: GFSize.LARGE),
-                      )
-                    : const SizedBox.shrink(),
-                const SizedBox(
-                  width: 8,
-                ),
                 Expanded(
                   child: GFButton(
                       onPressed: () {

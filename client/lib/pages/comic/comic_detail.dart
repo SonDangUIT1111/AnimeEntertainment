@@ -2,7 +2,9 @@ import 'package:anime_and_comic_entertainment/components/comic/ComicChapter.dart
 import 'package:anime_and_comic_entertainment/components/ui/Button.dart';
 import 'package:anime_and_comic_entertainment/model/comics.dart';
 import 'package:anime_and_comic_entertainment/pages/comic/comic_chapter_detail.dart';
+import 'package:anime_and_comic_entertainment/pages/search/search_genre_result_page.dart';
 import 'package:anime_and_comic_entertainment/services/comics_api.dart';
+import 'package:anime_and_comic_entertainment/services/firebase_api.dart';
 import 'package:anime_and_comic_entertainment/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -37,6 +39,7 @@ class _DetailComicPageState extends State<DetailComicPage> {
   @override
   void initState() {
     super.initState();
+    FirebaseApi().listenEvent(context);
     getComicDetailById().then((value) => setState(() {
           comic = value;
           isLoading = false;
@@ -297,8 +300,19 @@ class _DetailComicPageState extends State<DetailComicPage> {
                                       comic.genreNames!.length,
                                       (index) => GestureDetector(
                                         onTap: () {
-                                          print(comic.genreNames![index]
-                                              ['genreName']);
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  SearchGenreResultPage(
+                                                genreId: comic
+                                                    .genreNames![index]['_id'],
+                                                genreName:
+                                                    comic.genreNames![index]
+                                                        ['genreName'],
+                                              ),
+                                            ),
+                                          );
                                         },
                                         child: Text(
                                             comic.genreNames![index]

@@ -71,6 +71,7 @@ export const getLogin: RequestHandler = async (req, res) => {
                   hasReceivedDailyGift: false,
                 }
               : result["questLog"],
+          challenges: result["challenges"],
         })
         .end();
     } else {
@@ -89,7 +90,7 @@ export const postLogin: RequestHandler = async (req, res) => {
       return res.sendStatus(400);
     }
     var user = await getUserByPhone(phone).select(
-      "+authentication.salt + authentication.password + username + avatar + coinPoint + questLog"
+      "+authentication.salt + authentication.password + username + avatar + coinPoint + questLog + challenges"
     );
     if (!user) {
       return res.sendStatus(400);

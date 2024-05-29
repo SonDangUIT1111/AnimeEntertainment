@@ -34,13 +34,13 @@ class AuthApi {
         userProvider.setUsername(data['username']);
         userProvider.setUserAvatar(data['avatar']);
         userProvider.setCoinPoint(data['coinPoint']);
+        userProvider.setChallenges(data['challenges']);
         userProvider.setQuestLog(
             data["questLog"]["readingTime"],
             data["questLog"]["watchingTime"],
             data["questLog"]["received"],
             data["questLog"]["finalTime"],
             data["questLog"]["hasReceivedDailyGift"]);
-
         await prefs.setString(
             'auth-session-token', data['authentication']['sessionToken']);
         await Provider.of<VideoProvider>(context, listen: false)
@@ -64,7 +64,7 @@ class AuthApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -90,6 +90,7 @@ class AuthApi {
         userProvider.setUsername(jsonDecode(res.body)['username']);
         userProvider.setUserAvatar(jsonDecode(res.body)['avatar']);
         userProvider.setCoinPoint(jsonDecode(res.body)['coinPoint']);
+        userProvider.setChallenges(jsonDecode(res.body)['challenges']);
         userProvider.setQuestLog(
             jsonDecode(res.body)["questLog"]["readingTime"],
             jsonDecode(res.body)["questLog"]["watchingTime"],
@@ -104,7 +105,7 @@ class AuthApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -132,7 +133,7 @@ class AuthApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -170,7 +171,7 @@ class AuthApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -199,7 +200,7 @@ class AuthApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -225,7 +226,7 @@ class AuthApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -254,7 +255,7 @@ class AuthApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }

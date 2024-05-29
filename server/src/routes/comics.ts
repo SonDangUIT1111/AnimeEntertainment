@@ -44,6 +44,9 @@ router.get(
   ComicsController.checkUserHistoryHadSeenChapter
 );
 
+router.get("/getComicChapter", ComicsController.getComicChapter);
+
+
 router.get(
   "/getComicChapterComments",
   ComicsController.getComicChapterComments
@@ -51,7 +54,32 @@ router.get(
 
 router.post("/addRootChapterComments", ComicsController.addRootChapterComments);
 
+router.post(
+  "/addChildChapterComments",
+  ComicsController.addChildChapterComments
+);
+
+router.get(
+  "/checkValidCommentContent",
+  ComicsController.checkValidCommentContent
+);
+router.get("/checkUserBanned", ComicsController.checkUserBanned);
+
+router.put("/banUser", ComicsController.banUser);
+
 router.get("/searchComic", ComicsController.searchComics);
 
+router.post(
+  "/updateUserLikeParentComment",
+  ComicsController.updateUserLikeParentComment
+);
+router.post(
+  "/updateUserLikeChildComment",
+  ComicsController.updateUserLikeChildComment
+);
+
 router.get("/getReadingHistories", ComicsController.getReadingHistories);
+
+router.get("/searchComicByGenres", ComicsController.searchComicByGenres);
+
 export default router;

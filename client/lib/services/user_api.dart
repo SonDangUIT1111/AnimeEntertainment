@@ -40,7 +40,7 @@ class UsersApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -64,10 +64,68 @@ class UsersApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
+    }
+  }
+
+  static storeDeviceToken(BuildContext context, token) async {
+    var url = Uri.parse(
+      "${baseUrl}storeDeviceToken",
+    );
+    try {
+      var body = {
+        "userId": Provider.of<UserProvider>(context, listen: false).user.id,
+        "token": token
+      };
+      await http.put(url, body: body);
+    } catch (e) {
+      print(Provider.of<NavigatorProvider>(context, listen: false)
+          .isShowNetworkError);
+      if (Provider.of<NavigatorProvider>(context, listen: false)
+              .isShowNetworkError ==
+          false) {
+        Provider.of<NavigatorProvider>(context, listen: false)
+            .setShowNetworkError(true, 0, "Page1");
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const NoInternetPage()));
+      }
+    }
+  }
+
+  static sendPushNoti(String userId) async {
+    var url = Uri.parse(
+      "${baseUrl}sendPushNoti",
+    );
+    try {
+      var body = {
+        "title": "Ai đó đã trả lời bình luận của bạn",
+        "body": "Hãy kiểm tra ngay",
+        "userId": userId
+      };
+      await http.post(url, body: body);
+    } catch (e) {
+      return;
+    }
+  }
+
+  static addCommentNotiToUser(
+      String userId, String sourceId, String type) async {
+    var url = Uri.parse(
+      "${baseUrl}addCommentNotification",
+    );
+    try {
+      var body = {
+        "userId": userId,
+        "sourceId": sourceId,
+        "type": type,
+        "content": "Ai đó đã trả lời bình luận của bạn",
+      };
+      await http.post(url, body: body);
+    } catch (e) {
+      return;
     }
   }
 
@@ -91,7 +149,7 @@ class UsersApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -120,7 +178,7 @@ class UsersApi {
     if (!Provider.of<NavigatorProvider>(context, listen: false)
         .isShowNetworkError) {
       Provider.of<NavigatorProvider>(context, listen: false)
-          .setShowNetworkError(true);
+          .setShowNetworkError(true, 0, "Page1");
       Navigator.push(context,
           MaterialPageRoute(builder: (context) => const NoInternetPage()));
     }
