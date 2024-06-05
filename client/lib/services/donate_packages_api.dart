@@ -43,10 +43,43 @@ class DonatePackagesApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> getDonatorList(
+      BuildContext context) async {
+    var url = Uri.parse("${baseUrl}getDonatorList");
+    try {
+      final res = await http.get(url);
+      if (res.statusCode == 200) {
+        var result = jsonDecode(res.body) as List<dynamic>;
+        List<Map<String, dynamic>> donatorList = [];
+        result.forEach((element) {
+          donatorList.add({
+            'username': element['username'],
+            'totalCoins': element['totalCoins'],
+            'donationCount': element['donationCount'],
+            'avatar': element['avatar'],
+          });
+        });
+        return donatorList;
+      } else {
+        return [];
+      }
+    } catch (e) {
+      if (Provider.of<NavigatorProvider>(context, listen: false)
+              .isShowNetworkError ==
+          false) {
+        Provider.of<NavigatorProvider>(context, listen: false)
+            .setShowNetworkError(true, 0, "Page1");
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const NoInternetPage()));
+      }
+      return [];
     }
   }
 
@@ -72,7 +105,38 @@ class DonatePackagesApi {
       if (!Provider.of<NavigatorProvider>(context, listen: false)
           .isShowNetworkError) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const NoInternetPage()),
+        );
+      }
+      return false;
+    }
+  }
+
+  static Future<bool> processDonationPayment(
+      BuildContext context, int? amount, String userId) async {
+    var url = Uri.parse("${baseUrl}processDonationPayment");
+    try {
+      final res = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "amount": amount,
+          "userId": userId,
+        }),
+      );
+      if (res.statusCode == 201) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      if (!Provider.of<NavigatorProvider>(context, listen: false)
+          .isShowNetworkError) {
+        Provider.of<NavigatorProvider>(context, listen: false)
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const NoInternetPage()),

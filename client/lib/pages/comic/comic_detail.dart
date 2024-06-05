@@ -1,7 +1,9 @@
 import 'package:anime_and_comic_entertainment/components/comic/ComicChapter.dart';
 import 'package:anime_and_comic_entertainment/components/ui/Button.dart';
 import 'package:anime_and_comic_entertainment/model/comics.dart';
+import 'package:anime_and_comic_entertainment/pages/comic/comic_buy_chapter.dart';
 import 'package:anime_and_comic_entertainment/pages/comic/comic_chapter_detail.dart';
+import 'package:anime_and_comic_entertainment/pages/search/search_genre_result_page.dart';
 import 'package:anime_and_comic_entertainment/services/comics_api.dart';
 import 'package:anime_and_comic_entertainment/services/firebase_api.dart';
 import 'package:anime_and_comic_entertainment/utils/utils.dart';
@@ -99,9 +101,22 @@ class _DetailComicPageState extends State<DetailComicPage> {
                       width: 165,
                       height: 50,
                       action: () {
+                        if (comic.chapterList![0]['unlockPrice'] > 0) {
+                          Navigator.of(context).push(
+                            PageRouteBuilder(
+                              opaque: false,
+                              pageBuilder: (BuildContext context, _, __) {
+                                return ComicBuyChapter(
+                                  comic: comic,
+                                  index: 0,
+                                );
+                              },
+                            ),
+                          );
+                          return;
+                        }
                         Provider.of<NavigatorProvider>(context, listen: false)
                             .setShow(false);
-
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -299,8 +314,19 @@ class _DetailComicPageState extends State<DetailComicPage> {
                                       comic.genreNames!.length,
                                       (index) => GestureDetector(
                                         onTap: () {
-                                          print(comic.genreNames![index]
-                                              ['genreName']);
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  SearchGenreResultPage(
+                                                genreId: comic
+                                                    .genreNames![index]['_id'],
+                                                genreName:
+                                                    comic.genreNames![index]
+                                                        ['genreName'],
+                                              ),
+                                            ),
+                                          );
                                         },
                                         child: Text(
                                             comic.genreNames![index]
@@ -414,7 +440,7 @@ class _DetailComicPageState extends State<DetailComicPage> {
                             child: Column(
                                 children: List.generate(
                                     comic.chapterList!.length,
-                                    (index) => ComicChapter(
+                                    (index) => ComicChapterComponent(
                                         index: index, comic: comic))),
                           ),
                         ],

@@ -1,9 +1,12 @@
 import 'package:anime_and_comic_entertainment/components/ui/CoinButton.dart';
 import 'package:anime_and_comic_entertainment/pages/auth/get_otp.dart';
 import 'package:anime_and_comic_entertainment/pages/auth/login.dart';
+import 'package:anime_and_comic_entertainment/pages/donate/donate_page.dart';
+import 'package:anime_and_comic_entertainment/pages/donate/donate_podium_page.dart';
 import 'package:anime_and_comic_entertainment/pages/profile/about_us_page.dart';
 import 'package:anime_and_comic_entertainment/pages/profile/avatar_page.dart';
 import 'package:anime_and_comic_entertainment/pages/profile/bookmark_page.dart';
+import 'package:anime_and_comic_entertainment/pages/profile/edit_profile_page.dart';
 import 'package:anime_and_comic_entertainment/pages/profile/payment_history_page.dart';
 import 'package:anime_and_comic_entertainment/providers/navigator_provider.dart';
 import 'package:anime_and_comic_entertainment/providers/user_provider.dart';
@@ -55,7 +58,7 @@ class ProfilePage extends StatelessWidget {
                   top: 100,
                   child: SizedBox(
                       width: MediaQuery.of(context).size.width * 0.8,
-                      height: 540,
+                      height: 700,
                       child: Stack(
                         children: [
                           Positioned(
@@ -65,7 +68,7 @@ class ProfilePage extends StatelessWidget {
                                 height:
                                     user.authentication['sessionToken'] == ""
                                         ? 400
-                                        : 440,
+                                        : 500,
                                 decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(20),
                                     color: const Color(0xFF242424))),
@@ -148,7 +151,7 @@ class ProfilePage extends StatelessWidget {
                                   child: SizedBox(
                                     width:
                                         MediaQuery.of(context).size.width * 0.8,
-                                    height: 540,
+                                    height: 590,
                                     child: Padding(
                                       padding: const EdgeInsets.only(top: 60),
                                       child: Column(
@@ -165,7 +168,8 @@ class ProfilePage extends StatelessWidget {
                                                       color: Utils.primaryColor,
                                                       width: 2),
                                                   shape: BoxShape.circle,
-                                                  color: Colors.white,
+                                                  color:
+                                                      const Color(0xFF141414),
                                                   colorFilter:
                                                       const ColorFilter.mode(
                                                           Colors.transparent,
@@ -217,11 +221,20 @@ class ProfilePage extends StatelessWidget {
                                               const SizedBox(
                                                 width: 10,
                                               ),
-                                              const FaIcon(
-                                                FontAwesomeIcons
-                                                    .solidPenToSquare,
-                                                color: Colors.white,
-                                                size: 12,
+                                              GestureDetector(
+                                                onTap: () {
+                                                  Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              const EditProfilePage()));
+                                                },
+                                                child: const FaIcon(
+                                                  FontAwesomeIcons
+                                                      .solidPenToSquare,
+                                                  color: Colors.white,
+                                                  size: 12,
+                                                ),
                                               ),
                                             ],
                                           ),
@@ -272,7 +285,7 @@ class ProfilePage extends StatelessWidget {
                                                           style: TextStyle(
                                                               color:
                                                                   Colors.grey,
-                                                              fontSize: 13),
+                                                              fontSize: 12),
                                                         ),
                                                         const SizedBox(
                                                           height: 5,
@@ -316,10 +329,7 @@ class ProfilePage extends StatelessWidget {
                                                       ],
                                                     ),
                                                     CoinButton(
-                                                      action: () {
-                                                        _launchUrl;
-                                                      },
-                                                    ),
+                                                        action: _launchUrl),
                                                   ],
                                                 ),
                                                 const Divider(
@@ -331,10 +341,6 @@ class ProfilePage extends StatelessWidget {
                                                       top: 4.0, bottom: 4.0),
                                                   child: GestureDetector(
                                                     onTap: () {
-                                                      Provider.of<NavigatorProvider>(
-                                                              context,
-                                                              listen: false)
-                                                          .setShow(false);
                                                       Navigator.push(
                                                           context,
                                                           MaterialPageRoute(
@@ -423,10 +429,48 @@ class ProfilePage extends StatelessWidget {
                                                       top: 4.0, bottom: 4.0),
                                                   child: GestureDetector(
                                                     onTap: () {
-                                                      Provider.of<NavigatorProvider>(
-                                                              context,
-                                                              listen: false)
-                                                          .setShow(false);
+                                                      Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                              builder: (context) =>
+                                                                  const DonatePodium()));
+                                                    },
+                                                    child: Row(
+                                                      children: [
+                                                        SizedBox(
+                                                          width: 20,
+                                                          child: FaIcon(
+                                                            FontAwesomeIcons
+                                                                .rankingStar,
+                                                            color: Colors.white,
+                                                            size: 18,
+                                                          ),
+                                                        ),
+                                                        SizedBox(
+                                                          width: 10,
+                                                        ),
+                                                        Text(
+                                                          'Bảng xếp hạng đóng góp',
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.white,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600),
+                                                        )
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                                const Divider(
+                                                  color: Colors.grey,
+                                                  thickness: .5,
+                                                ),
+                                                Padding(
+                                                  padding: EdgeInsets.only(
+                                                      top: 4.0, bottom: 4.0),
+                                                  child: GestureDetector(
+                                                    onTap: () {
                                                       Navigator.push(
                                                           context,
                                                           MaterialPageRoute(
@@ -464,23 +508,32 @@ class ProfilePage extends StatelessWidget {
                                                   color: Colors.grey,
                                                   thickness: .5,
                                                 ),
-                                                Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            top: 4.0,
-                                                            bottom: 4.0),
-                                                    child: AspectRatio(
-                                                      aspectRatio: 4 / 1,
-                                                      child: ClipRRect(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(4),
-                                                        child: Image.asset(
-                                                          "assets/images/donatebanner.png",
-                                                          fit: BoxFit.cover,
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                            builder: (context) =>
+                                                                const DonatePage()));
+                                                  },
+                                                  child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              top: 4.0,
+                                                              bottom: 4.0),
+                                                      child: AspectRatio(
+                                                        aspectRatio: 4 / 1,
+                                                        child: ClipRRect(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(4),
+                                                          child: Image.asset(
+                                                            "assets/images/donatebanner.png",
+                                                            fit: BoxFit.cover,
+                                                          ),
                                                         ),
-                                                      ),
-                                                    )),
+                                                      )),
+                                                ),
                                                 Padding(
                                                   padding:
                                                       const EdgeInsets.only(
@@ -492,6 +545,10 @@ class ProfilePage extends StatelessWidget {
                                                           context: context,
                                                           builder: (_) =>
                                                               CustomAlertChoiceDialog(
+                                                                yesContent:
+                                                                    "Đăng xuất",
+                                                                noContent:
+                                                                    "Bỏ qua",
                                                                 content:
                                                                     "Việc đăng xuất sẽ hạn chế một số tính năng của ứng dụng",
                                                                 title:

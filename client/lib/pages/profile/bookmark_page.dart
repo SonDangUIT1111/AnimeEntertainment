@@ -2,7 +2,8 @@ import 'package:anime_and_comic_entertainment/components/AnimeBookmarkItem.dart'
 import 'package:anime_and_comic_entertainment/components/ComicBookmarkItem.dart';
 import 'package:anime_and_comic_entertainment/components/ui/AlertChoiceDialog.dart';
 import 'package:anime_and_comic_entertainment/components/ui/Button.dart';
-import 'package:anime_and_comic_entertainment/model/animes.dart';
+import 'package:anime_and_comic_entertainment/model/animeepisodes.dart';
+import 'package:anime_and_comic_entertainment/model/comicchapters.dart';
 import 'package:anime_and_comic_entertainment/model/comics.dart';
 import 'package:anime_and_comic_entertainment/providers/navigator_provider.dart';
 import 'package:anime_and_comic_entertainment/services/user_api.dart';
@@ -22,8 +23,8 @@ class BookMarkPage extends StatefulWidget {
 }
 
 class _BookMarkPageState extends State<BookMarkPage> {
-  List<Animes> listAnimeItem = [];
-  List<Comics> listComicItem = [];
+  List<AnimeEpisodes> listAnimeItem = [];
+  List<ComicChapter> listComicItem = [];
   bool hasData = true;
   bool isEditing = false;
   List<int> selectedAnimeIndexes = [];
@@ -42,28 +43,28 @@ class _BookMarkPageState extends State<BookMarkPage> {
       if (userId == "") return;
       final result = await UsersApi.getBookmartList(context, userId);
       setState(() {
-        listAnimeItem = (result[0]['animes'] as List)
-            .map((item) => Animes(
-                id: item['_id'],
-                coverImage: item['coverImage'],
-                movieName: item['movieName'],
-                description: item['description'],
-                episodes: item['episodes'],
-                genreNames: item['genreNames']))
-            .toList();
-        listComicItem = (result[0]['comics'] as List)
-            .map((item) => Comics(
-                id: item['_id'],
-                coverImage: item['coverImage'],
-                genres: item['genres'],
-                comicName: item['comicName'],
-                description: item['description'],
-                chapterList: item['chapterList'],
-                genreNames: item['genreNames']))
-            .toList();
+        result[0]['animes'].forEach((item) {
+          listAnimeItem.add(AnimeEpisodes(
+              id: item['_id'],
+              coverImage: item['coverImage'],
+              episodeName: item['episodeName'],
+              movieOwner: item['owner'][0]['movieName'],
+              movieOwnerId: item['owner'][0]['_id'],
+              genreNames: item['owner'][0]['genreNames']));
+        });
+        result[0]['comics'].forEach((item) {
+          listComicItem.add(ComicChapter(
+              id: item['_id'],
+              coverImage: item['coverImage'],
+              chapterName: item['chapterName'],
+              comicOwner: item['owner'][0]['comicName'],
+              genreNames: item['owner'][0]['genreNames'],
+              index: item['owner'][0]['index'],
+              comicOwnerId: item['owner'][0]['_id'],
+              comicChapterList: item['owner'][0]['chapterListDetail']));
+        });
       });
     } catch (e) {
-      print('Error fetching bookmark list: $e');
       // Handle error
     }
   }
@@ -75,6 +76,7 @@ class _BookMarkPageState extends State<BookMarkPage> {
       child: Scaffold(
         backgroundColor: const Color(0xFF141414),
         appBar: GFAppBar(
+          automaticallyImplyLeading: false,
           backgroundColor: const Color(0xFF141414),
           elevation: 0,
           title: Row(
@@ -188,12 +190,10 @@ class _BookMarkPageState extends State<BookMarkPage> {
         itemBuilder: (context, index) {
           return isEditing
               ? AnimeBookmarkItem(
-                  animeId: listAnimeItem[index].id!,
+                  animeId: listAnimeItem[index].movieOwnerId!,
                   coverImage: listAnimeItem[index].coverImage!,
-                  movieName: listAnimeItem[index].movieName!,
+                  movieName: listAnimeItem[index].movieOwner!,
                   isBookmarked: true,
-                  description: listAnimeItem[index].description!,
-                  episodeListNumber: listAnimeItem[index].episodes!.length,
                   genreNames: listAnimeItem[index].genreNames!,
                   isChecked: selectedAnimeIndexes.contains(index),
                   onChanged: (bool? value) {
@@ -205,15 +205,17 @@ class _BookMarkPageState extends State<BookMarkPage> {
                       }
                     });
                   },
+                  animeepisodeId: listAnimeItem[index].id!,
+                  episodeName: listAnimeItem[index].episodeName!,
                 )
               : AnimeBookmarkItem(
-                  animeId: listAnimeItem[index].id!,
+                  animeId: listAnimeItem[index].movieOwnerId!,
                   coverImage: listAnimeItem[index].coverImage!,
-                  movieName: listAnimeItem[index].movieName!,
+                  movieName: listAnimeItem[index].movieOwner!,
                   isBookmarked: true,
-                  description: listAnimeItem[index].description!,
-                  episodeListNumber: listAnimeItem[index].episodes!.length,
                   genreNames: listAnimeItem[index].genreNames!,
+                  animeepisodeId: listAnimeItem[index].id!,
+                  episodeName: listAnimeItem[index].episodeName!,
                 );
         },
       ),
@@ -249,12 +251,10 @@ class _BookMarkPageState extends State<BookMarkPage> {
         itemBuilder: (context, index) {
           return isEditing
               ? ComicBookmarkItem(
-                  comicId: listComicItem[index].id!,
+                  comicId: listComicItem[index].comicOwnerId!,
                   coverImage: listComicItem[index].coverImage!,
-                  comicName: listComicItem[index].comicName!,
+                  comicName: listComicItem[index].comicOwner!,
                   isBookmarked: true,
-                  description: listComicItem[index].description!,
-                  chapterListNumber: listComicItem[index].chapterList!.length,
                   genreNames: listComicItem[index].genreNames!,
                   isChecked: selectedComicIndexes.contains(index),
                   onChanged: (bool? value) {
@@ -266,16 +266,23 @@ class _BookMarkPageState extends State<BookMarkPage> {
                       }
                     });
                   },
+                  comicChapterId: listComicItem[index].id!,
+                  comicChapterName: listComicItem[index].chapterName!,
+                  index: listComicItem[index].index!,
+                  comicVar: Comics(
+                      chapterList: listComicItem[index].comicChapterList!),
                 )
               : ComicBookmarkItem(
-                  comicId: listComicItem[index].id!,
+                  comicId: listComicItem[index].comicOwnerId!,
                   coverImage: listComicItem[index].coverImage!,
-                  comicName: listComicItem[index].comicName!,
+                  comicName: listComicItem[index].comicOwner!,
                   isBookmarked: true,
-                  description: listComicItem[index].description!,
-                  chapterListNumber: listComicItem[index].chapterList!.length,
                   genreNames: listComicItem[index].genreNames!,
-                );
+                  comicChapterId: listComicItem[index].id!,
+                  comicChapterName: listComicItem[index].chapterName!,
+                  index: listComicItem[index].index!,
+                  comicVar: Comics(
+                      chapterList: listComicItem[index].comicChapterList!));
         },
       ),
     );

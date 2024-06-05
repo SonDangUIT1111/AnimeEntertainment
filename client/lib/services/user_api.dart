@@ -40,7 +40,7 @@ class UsersApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -64,7 +64,34 @@ class UsersApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const NoInternetPage()));
+      }
+    }
+  }
+
+  static paySkycoin(BuildContext context, coin, chapterId) async {
+    var url = Uri.parse(
+      "${baseUrl}paySkycoin",
+    );
+    try {
+      var body = {
+        "userId": Provider.of<UserProvider>(context, listen: false).user.id,
+        "coin": coin.toString(),
+        "chapterId": chapterId
+      };
+      final res = await http.put(url, body: body);
+      Provider.of<UserProvider>(context, listen: false)
+          .setCoinPoint(jsonDecode(res.body)['coinPoint']);
+    } catch (e) {
+      print(Provider.of<NavigatorProvider>(context, listen: false)
+          .isShowNetworkError);
+      if (Provider.of<NavigatorProvider>(context, listen: false)
+              .isShowNetworkError ==
+          false) {
+        Provider.of<NavigatorProvider>(context, listen: false)
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -88,22 +115,71 @@ class UsersApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
     }
   }
 
-  static getBookmartList(BuildContext context, userId) async {
+  static sendPushNoti(String userId) async {
     var url = Uri.parse(
-      "${baseUrl}getBookmarkList?userId=$userId",
+      "${baseUrl}sendPushNoti",
+    );
+    try {
+      var body = {
+        "title": "Ai đó đã trả lời bình luận của bạn",
+        "body": "Hãy kiểm tra ngay",
+        "userId": userId
+      };
+      await http.post(url, body: body);
+    } catch (e) {
+      return;
+    }
+  }
+
+  static readNotication(BuildContext context, int index) async {
+    var url = Uri.parse(
+      "${baseUrl}readNotification",
+    );
+    try {
+      var body = {
+        "userId": Provider.of<UserProvider>(context, listen: false).user.id,
+        "index": index.toString()
+      };
+      await http.put(url, body: body);
+    } catch (e) {
+      return;
+    }
+  }
+
+  static addCommentNotiToUser(
+      String userId, String sourceId, String type) async {
+    var url = Uri.parse(
+      "${baseUrl}addCommentNotification",
+    );
+    try {
+      var body = {
+        "userId": userId,
+        "sourceId": sourceId,
+        "type": type,
+        "content": "Ai đó đã trả lời bình luận của bạn",
+      };
+      await http.post(url, body: body);
+    } catch (e) {
+      return;
+    }
+  }
+
+  static getPaymentHistories(BuildContext context) async {
+    var userId = Provider.of<UserProvider>(context, listen: false).user.id;
+    var url = Uri.parse(
+      "${baseUrl}getPaymentHistories?userId=$userId",
     );
     try {
       final res = await http.get(url);
       if (res.statusCode == 200) {
         var result = (jsonDecode(res.body));
-        print(result);
         return result;
       } else {
         return [];
@@ -115,7 +191,34 @@ class UsersApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const NoInternetPage()));
+      }
+    }
+    return [];
+  }
+
+  static getBookmartList(BuildContext context, userId) async {
+    var url = Uri.parse(
+      "${baseUrl}getBookmarkList?userId=$userId",
+    );
+    try {
+      final res = await http.get(url);
+      if (res.statusCode == 200) {
+        var result = (jsonDecode(res.body));
+        return result;
+      } else {
+        return [];
+      }
+    } catch (e) {
+      print(Provider.of<NavigatorProvider>(context, listen: false)
+          .isShowNetworkError);
+      if (Provider.of<NavigatorProvider>(context, listen: false)
+              .isShowNetworkError ==
+          false) {
+        Provider.of<NavigatorProvider>(context, listen: false)
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -144,7 +247,7 @@ class UsersApi {
     if (!Provider.of<NavigatorProvider>(context, listen: false)
         .isShowNetworkError) {
       Provider.of<NavigatorProvider>(context, listen: false)
-          .setShowNetworkError(true);
+          .setShowNetworkError(true, 0, "Page1");
       Navigator.push(context,
           MaterialPageRoute(builder: (context) => const NoInternetPage()));
     }

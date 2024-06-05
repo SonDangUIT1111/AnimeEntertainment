@@ -18,7 +18,7 @@ router.get("/getRankingTable", ComicsController.getRankingTable);
 
 router.get("/getDetailComicById", ComicsController.getDetailComicById);
 
-router.put("/updateUserSaveChapter", ComicsController.updateUserSaveChapter);
+router.post("/updateUserSaveChapter", ComicsController.updateUserSaveChapter);
 
 router.get(
   "/checkUserHasLikeOrSaveChapter",
@@ -45,7 +45,6 @@ router.get(
 );
 
 router.get("/getComicChapter", ComicsController.getComicChapter);
-
 
 router.get(
   "/getComicChapterComments",
@@ -77,10 +76,9 @@ router.post(
   "/updateUserLikeChildComment",
   ComicsController.updateUserLikeChildComment
 );
-router.put("/updateNotiComment", ComicsController.updateNotiComment);
 
 router.get("/getReadingHistories", ComicsController.getReadingHistories);
 
-router.post("/testComment", ComicsController.testComment);
+router.get("/searchComicByGenres", ComicsController.searchComicByGenres);
 
 export default router;

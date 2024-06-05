@@ -10,6 +10,7 @@ class UserProvider extends ChangeNotifier {
       histories: {},
       username: '',
       avatar: '',
+      notificationSentCount: 0,
       coinPoint: 0,
       questLog: {
         "readingTime": 0,
@@ -17,7 +18,8 @@ class UserProvider extends ChangeNotifier {
         "received": [],
         "finalTime": DateTime.now(),
         "hasReceivedDailyGift": false,
-      });
+      },
+      challenges: []);
 
   User get user => _user;
   void setUserToken(String token) {
@@ -42,6 +44,16 @@ class UserProvider extends ChangeNotifier {
 
   void setCoinPoint(int coinPoint) {
     _user.coinPoint = coinPoint;
+    notifyListeners();
+  }
+
+  void minusCoinPoint(int coinPoint) {
+    _user.coinPoint -= coinPoint;
+    notifyListeners();
+  }
+
+  void setNotificationSentCount(int count) {
+    _user.notificationSentCount += count;
     notifyListeners();
   }
 
@@ -86,6 +98,11 @@ class UserProvider extends ChangeNotifier {
       "finalTime": DateTime.parse(date),
       "hasReceivedDailyGift": hasReceivedDailyGift
     };
+    notifyListeners();
+  }
+
+  void setChallenges(List value) {
+    _user.challenges = value;
     notifyListeners();
   }
 

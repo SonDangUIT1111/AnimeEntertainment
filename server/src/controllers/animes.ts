@@ -6,12 +6,33 @@ import BannerModel from "../models/banner";
 import AnimeEpisodeModel from "../models/animeEpisode";
 import UserModel from "../models/user";
 import AnimeAlbumModel from "../models/animeAlbum";
+import GenresModel from "../models/genres";
 import qs from "qs";
 
 export const getAnimeBanner: RequestHandler = async (req, res, next) => {
   try {
-    const banners = await BannerModel.findOne({ type: "Anime" });
-    res.status(200).json(banners);
+    const banners = await BannerModel.aggregate([
+      {
+        $match: { type: "Anime" },
+      },
+      {
+        $lookup: {
+          from: "animes",
+          localField: "list",
+          foreignField: "_id",
+          as: "animeList",
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          type: 1,
+          "animeList._id": 1,
+          "animeList.landspaceImage": 1,
+        },
+      },
+    ]);
+    res.status(200).json(banners[0]);
   } catch (error) {
     next(error);
   }
@@ -704,6 +725,211 @@ export const searchAnimeAndEpisodes: RequestHandler = async (
     });
 
     res.status(200).json({ animeResults, episodeResults });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const searchAnimeByGenres: RequestHandler = async (req, res, next) => {
+  const url = req.url;
+  const [, params] = url.split("?");
+  const parsedParams = qs.parse(params);
+  const genreId =
+    typeof parsedParams.genreId === "string" ? parsedParams.genreId : "";
+  try {
+    if (!mongoose.isValidObjectId(genreId)) {
+      throw createHttpError(400, "Invalid user id");
+    }
+    const animes = await AnimesModel.find({
+      genres: new mongoose.Types.ObjectId(genreId),
+    });
+    res.status(200).json(animes);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getGenres: RequestHandler = async (req, res, next) => {
+  try {
+    const genres = await GenresModel.find();
+    res.status(200).json(genres);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getAnimeEpisodeComments: RequestHandler = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const url = req.url;
+    const [, params] = url.split("?");
+    const parsedParams = qs.parse(params);
+    const episodeId =
+      typeof parsedParams.episodeId === "string" ? parsedParams.episodeId : "";
+    var episode = await AnimeEpisodeModel.findById(episodeId).select(
+      "comments"
+    );
+    if (!episode) {
+      return res.sendStatus(400);
+    }
+    console.log(episode.comments);
+    return res.status(200).json(episode.comments).end();
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const addRootEpisodeComments: RequestHandler = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const { episodeId, userId, content } = req.body;
+    var episode = await AnimeEpisodeModel.findById(episodeId);
+    if (!episode) {
+      return res.sendStatus(400);
+    }
+    var user = await UserModel.findById(userId);
+    if (!user) {
+      return res.sendStatus(400);
+    }
+    episode.comments.push({
+      _id: new mongoose.Types.ObjectId(),
+      userId: new mongoose.Types.ObjectId(userId),
+      likes: new mongoose.Types.Array(),
+      replies: new mongoose.Types.Array(),
+      content: content,
+      avatar: user.avatar,
+      userName: user.username === null ? "" : user.username,
+    });
+    console.log(episode.comments);
+    await episode?.save();
+    return res.status(200).json(episode).end();
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const addChildEpisodeComments: RequestHandler = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const { episodeId, userId, commentId, content } = req.body;
+    var episode = await AnimeEpisodeModel.findById(episodeId);
+    if (!episode) {
+      return res.sendStatus(400);
+    }
+
+    var user = await UserModel.findById(userId);
+    if (!user) {
+      return res.sendStatus(400);
+    }
+
+    episode.comments.forEach(async (item, index) => {
+      if (item._id.toString() === commentId) {
+        item.replies.push({
+          _id: new mongoose.Types.ObjectId(),
+          userId: new mongoose.Types.ObjectId(userId),
+          likes: new mongoose.Types.Array(),
+          content: content,
+          avatar: user?.avatar,
+          userName: user?.username,
+        });
+        const changed = await AnimeEpisodeModel.findByIdAndUpdate(
+          episodeId,
+          episode!
+        );
+        return res.status(200).json(changed).end();
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateUserLikeParentComment: RequestHandler = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const { episodeId, userId, commentId } = req.body;
+    var episode = await AnimeEpisodeModel.findById(episodeId);
+    if (!episode) {
+      return res.sendStatus(400);
+    }
+
+    episode.comments.forEach(async (item) => {
+      if (item._id.toString() === commentId) {
+        const copyList = item.likes.filter(
+          (item: mongoose.Types.ObjectId) => item.toString() !== userId
+        );
+        if (copyList.length === item.likes.length) {
+          item.likes.push(new mongoose.Types.ObjectId(userId));
+          const changed = await AnimeEpisodeModel.findByIdAndUpdate(
+            episodeId,
+            episode!
+          );
+          return res.status(200).json(changed).end();
+        } else {
+          item.likes = copyList;
+          const changed = await AnimeEpisodeModel.findByIdAndUpdate(
+            episodeId,
+            episode!
+          );
+          return res.status(200).json(changed).end();
+        }
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateUserLikeChildComment: RequestHandler = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const { episodeId, userId, commentId, commentChildId } = req.body;
+    var episode = await AnimeEpisodeModel.findById(episodeId);
+    if (!episode) {
+      return res.sendStatus(400);
+    }
+    console.log(commentId, commentChildId, userId);
+    episode.comments.forEach((item) => {
+      if (item._id.toString() === commentId) {
+        item.replies.forEach(async (item: any) => {
+          if (item._id.toString() === commentChildId) {
+            const copyList = item.likes.filter(
+              (item: mongoose.Types.ObjectId) => item.toString() !== userId
+            );
+            if (copyList.length === item.likes.length) {
+              item.likes.push(new mongoose.Types.ObjectId(userId));
+              const changed = await AnimeEpisodeModel.findByIdAndUpdate(
+                episodeId,
+                episode!
+              );
+              return res.status(200).json(changed).end();
+            } else {
+              item.likes = copyList;
+              const changed = await AnimeEpisodeModel.findByIdAndUpdate(
+                episodeId,
+                episode!
+              );
+              return res.status(200).json(changed).end();
+            }
+          }
+        });
+      }
+    });
   } catch (error) {
     next(error);
   }

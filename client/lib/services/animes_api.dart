@@ -6,6 +6,8 @@ import 'package:anime_and_comic_entertainment/model/album.dart';
 import 'package:anime_and_comic_entertainment/model/animeepisodes.dart';
 import 'package:anime_and_comic_entertainment/model/animes.dart';
 import 'package:anime_and_comic_entertainment/model/banner.dart';
+import 'package:anime_and_comic_entertainment/model/genre.dart';
+import 'package:anime_and_comic_entertainment/model/comment.dart';
 import 'package:anime_and_comic_entertainment/model/watchingHistories.dart';
 import 'package:anime_and_comic_entertainment/pages/home/no_internet_page.dart';
 import 'package:anime_and_comic_entertainment/providers/navigator_provider.dart';
@@ -26,9 +28,9 @@ class AnimesApi {
       if (res.statusCode == 200) {
         var result = (jsonDecode(res.body));
         List<BannerItem> bannerArray = [];
-        result['list'].forEach((element) {
+        result['animeList'].forEach((element) {
           bannerArray.add(BannerItem(
-              bannerImage: element['bannerImage'], urlId: element['urlId']));
+              bannerImage: element['landspaceImage'], urlId: element['_id']));
         });
         return bannerArray;
       } else {
@@ -41,7 +43,7 @@ class AnimesApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -74,7 +76,7 @@ class AnimesApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -111,7 +113,7 @@ class AnimesApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -146,7 +148,7 @@ class AnimesApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -180,7 +182,7 @@ class AnimesApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -213,7 +215,7 @@ class AnimesApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -250,7 +252,7 @@ class AnimesApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -290,7 +292,7 @@ class AnimesApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -307,13 +309,17 @@ class AnimesApi {
         var result = (jsonDecode(res.body));
         AnimeEpisodes episodeDetail = AnimeEpisodes(
             id: result[0]['_id'],
-            advertising: result[0]['advertisementContent'][0]['adVideoUrl'],
+            advertising: result[0]['advertisementContent'].length > 0
+                ? result[0]['advertisementContent'][0]['adVideoUrl']
+                : "",
             content: result[0]['content'],
             episodeName: result[0]['episodeName'],
             likes: result[0]['likes'],
             totalTime: result[0]['totalTime'],
             views: result[0]['views'],
-            adLink: result[0]['advertisementContent'][0]['forwardLink'],
+            adLink: result[0]['advertisementContent'].length > 0
+                ? result[0]['advertisementContent'][0]['forwardLink']
+                : "",
             comments: result[0]['comments']);
 
         return episodeDetail;
@@ -327,7 +333,7 @@ class AnimesApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -364,7 +370,7 @@ class AnimesApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -399,7 +405,7 @@ class AnimesApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -422,7 +428,7 @@ class AnimesApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -443,7 +449,7 @@ class AnimesApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -464,7 +470,7 @@ class AnimesApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -491,7 +497,7 @@ class AnimesApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -530,7 +536,7 @@ class AnimesApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -560,7 +566,7 @@ class AnimesApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -586,7 +592,7 @@ class AnimesApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }
@@ -618,7 +624,203 @@ class AnimesApi {
               .isShowNetworkError ==
           false) {
         Provider.of<NavigatorProvider>(context, listen: false)
-            .setShowNetworkError(true);
+            .setShowNetworkError(true, 0, "Page1");
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const NoInternetPage()));
+      }
+    }
+  }
+
+  static searchAnimeByGenres(BuildContext context, genreId) async {
+    var url = Uri.parse("${baseUrl}searchAnimeByGenres?genreId=$genreId");
+    try {
+      final res = await http.get(url);
+      if (res.statusCode == 200) {
+        var result = (jsonDecode(res.body));
+        List<Animes> animeArray = [];
+        result.forEach((element) {
+          animeArray.add(Animes(
+              id: element['_id'],
+              coverImage: element['coverImage'],
+              movieName: element['movieName']));
+        });
+        return animeArray;
+      } else {
+        return [];
+      }
+    } catch (e) {
+      print(Provider.of<NavigatorProvider>(context, listen: false)
+          .isShowNetworkError);
+      if (Provider.of<NavigatorProvider>(context, listen: false)
+              .isShowNetworkError ==
+          false) {
+        Provider.of<NavigatorProvider>(context, listen: false)
+            .setShowNetworkError(true, 0, "Page1");
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const NoInternetPage()));
+      }
+    }
+  }
+
+  static getGenres(BuildContext context) async {
+    var url = Uri.parse(
+      "${baseUrl}getGenres",
+    );
+    try {
+      final res = await http.get(url);
+      if (res.statusCode == 200) {
+        var result = (jsonDecode(res.body));
+        List<Genre> genreArray = [];
+        result.forEach((element) {
+          genreArray
+              .add(Genre(id: element['_id'], genreName: element['genreName']));
+        });
+        return genreArray;
+      } else {
+        return [];
+      }
+    } catch (e) {
+      print(Provider.of<NavigatorProvider>(context, listen: false)
+          .isShowNetworkError);
+      if (Provider.of<NavigatorProvider>(context, listen: false)
+              .isShowNetworkError ==
+          false) {
+        Provider.of<NavigatorProvider>(context, listen: false)
+            .setShowNetworkError(true, 0, "Page1");
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const NoInternetPage()));
+      }
+    }
+  }
+
+  static getAnimeEpisodeComments(BuildContext context, episodeId) async {
+    var url =
+        Uri.parse("${baseUrl}getAnimeEpisodeComments?episodeId=$episodeId");
+    try {
+      final res = await http.get(url);
+      if (res.statusCode == 200) {
+        var result = (jsonDecode(res.body));
+        List<Comments> comments = [];
+
+        result.forEach((element) {
+          comments.add(Comments(
+              id: element["_id"],
+              userId: element['userId'],
+              likes: element['likes'],
+              replies: element['replies'],
+              content: element['content'],
+              userName: element['userName'],
+              avatar: element['avatar']));
+        });
+
+        return comments;
+      } else {
+        return {};
+      }
+    } catch (e) {
+      print(Provider.of<NavigatorProvider>(context, listen: false)
+          .isShowNetworkError);
+      if (Provider.of<NavigatorProvider>(context, listen: false)
+              .isShowNetworkError ==
+          false) {
+        Provider.of<NavigatorProvider>(context, listen: false)
+            .setShowNetworkError(true, 0, "Page1");
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const NoInternetPage()));
+      }
+    }
+  }
+
+  static addRootEpisodeComment(
+      BuildContext context, episodeId, userId, content) async {
+    var url = Uri.parse("${baseUrl}addRootEpisodeComments");
+    try {
+      var body = {"episodeId": episodeId, "userId": userId, "content": content};
+      await http.post(url, body: body);
+    } catch (e) {
+      print(Provider.of<NavigatorProvider>(context, listen: false)
+          .isShowNetworkError);
+      if (Provider.of<NavigatorProvider>(context, listen: false)
+              .isShowNetworkError ==
+          false) {
+        Provider.of<NavigatorProvider>(context, listen: false)
+            .setShowNetworkError(true, 0, "Page1");
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const NoInternetPage()));
+      }
+    }
+  }
+
+  static addChildEpisodeComment(
+      BuildContext context, episodeId, commentId, userId, content) async {
+    var url = Uri.parse("${baseUrl}addChildEpisodeComments");
+    try {
+      var body = {
+        "episodeId": episodeId,
+        "commentId": commentId,
+        "userId": userId,
+        "content": content
+      };
+      await http.put(url, body: body);
+    } catch (e) {
+      print(Provider.of<NavigatorProvider>(context, listen: false)
+          .isShowNetworkError);
+      if (Provider.of<NavigatorProvider>(context, listen: false)
+              .isShowNetworkError ==
+          false) {
+        Provider.of<NavigatorProvider>(context, listen: false)
+            .setShowNetworkError(true, 0, "Page1");
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const NoInternetPage()));
+      }
+    }
+  }
+
+  static updateUserLikeParentComment(
+      BuildContext context, episodeId, userId, commentId) async {
+    var url = Uri.parse("${baseUrl}updateUserLikeParentComment");
+    print(commentId);
+
+    try {
+      var body = {
+        "episodeId": episodeId,
+        "commentId": commentId,
+        "userId": userId
+      };
+      await http.put(url, body: body);
+    } catch (e) {
+      print(Provider.of<NavigatorProvider>(context, listen: false)
+          .isShowNetworkError);
+      if (Provider.of<NavigatorProvider>(context, listen: false)
+              .isShowNetworkError ==
+          false) {
+        Provider.of<NavigatorProvider>(context, listen: false)
+            .setShowNetworkError(true, 0, "Page1");
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const NoInternetPage()));
+      }
+    }
+  }
+
+  static updateUserLikeChildComment(BuildContext context, episodeId, userId,
+      commentId, commentChildId) async {
+    var url = Uri.parse("${baseUrl}updateUserLikeChildComment");
+    try {
+      var body = {
+        "episodeId": episodeId,
+        "commentId": commentId,
+        "userId": userId,
+        "commentChildId": commentChildId
+      };
+      await http.put(url, body: body);
+    } catch (e) {
+      print(Provider.of<NavigatorProvider>(context, listen: false)
+          .isShowNetworkError);
+      if (Provider.of<NavigatorProvider>(context, listen: false)
+              .isShowNetworkError ==
+          false) {
+        Provider.of<NavigatorProvider>(context, listen: false)
+            .setShowNetworkError(true, 0, "Page1");
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const NoInternetPage()));
       }

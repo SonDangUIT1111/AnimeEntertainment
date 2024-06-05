@@ -53,4 +53,24 @@ router.get(
 router.get("/searchAnimeAndEpisodes", AnimeController.searchAnimeAndEpisodes);
 
 router.get("/getWatchingHistories", AnimeController.getWatchingHistories);
+
+router.get("/searchAnimeByGenres", AnimeController.searchAnimeByGenres);
+
+router.get("/getGenres", AnimeController.getGenres);
+
+router.get("/getAnimeEpisodeComments", AnimeController.getAnimeEpisodeComments);
+
+router.post("/addRootEpisodeComments", AnimeController.addRootEpisodeComments);
+
+router.put("/addChildEpisodeComments", AnimeController.addChildEpisodeComments);
+
+router.put(
+  "/updateUserLikeParentComment",
+  AnimeController.updateUserLikeParentComment
+);
+
+router.put(
+  "/updateUserLikeChildComment",
+  AnimeController.updateUserLikeChildComment
+);
 export default router;

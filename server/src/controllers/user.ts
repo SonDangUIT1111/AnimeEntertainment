@@ -1,10 +1,11 @@
 import { RequestHandler } from "express";
 import createHttpError from "http-errors";
 import mongoose from "mongoose";
-import * as admin from 'firebase-admin';
+import * as admin from "firebase-admin";
 import AvatarModel from "../models/avatars";
 import UserModel from "../models/user";
 import qs from "qs";
+import PaymentHistoryModel from "../models/paymentHistories";
 import ComicsModel from "../models/comics";
 import AnimeModel from "../models/anime";
 
@@ -33,11 +34,7 @@ export const updateAvatar: RequestHandler = async (req, res, next) => {
   }
 };
 
-export const getNotification: RequestHandler = async (
-  req,
-  res,
-  next
-) => {
+export const getNotification: RequestHandler = async (req, res, next) => {
   const url = req.url;
   const [, params] = url.split("?");
   const parsedParams = qs.parse(params);
@@ -72,48 +69,143 @@ export const storeDeviceToken: RequestHandler = async (req, res, next) => {
   }
 };
 
-export const sendPushNoti: RequestHandler = async (
+export const addCommentNotification: RequestHandler = async (
   req,
   res,
   next
 ) => {
   try {
+    const { userId, sourceId, type, content } = req.body;
+    var user = await UserModel.findById(userId);
+    if (!user) {
+      return res.sendStatus(400);
+    }
+    user.notifications.push({
+      sourceId: sourceId,
+      type: type,
+      content: content,
+      status: "sent",
+      sentTime: new Date(),
+    });
+    await user?.save();
+    return res.status(200).json(user).end();
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const sendPushNoti: RequestHandler = async (req, res, next) => {
+  try {
     try {
       var serviceAccount = require("../../pushnotiflutter-95328-firebase-adminsdk-rdiar-9008d7c00f.json");
       admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount)
+        credential: admin.credential.cert(serviceAccount),
       });
-    }
-    catch {
-
-    }
+    } catch { }
 
     //const token = "fYxl0HrhQGWk50NtCOKqq6:APA91bHMWUF391_XNFlIlBQcCzPK-1qwofwwZAj0pfE072_3q5ZhbzGOIgmV8i-nk-lOrLHoYPVo6rL7MjFXn0XttdBFwn5-rh3Wad8dfy7xFXfcN5MNRdmaUb0PpOJakDZvqLvdXGAt";
+
+    var user = await UserModel.findById(req.body.userId);
+
+    if (!user) {
+      return res.sendStatus(400);
+    }
 
     const message = {
       notification: {
         title: req.body.title,
         body: req.body.body,
       },
-      token: req.body.token, // This is the device token
+      token: user.deviceToken!, // This is the device token
     };
 
     // Send a message to the device corresponding to the provided
     // registration token.
-    admin.messaging().send(message)
+    admin
+      .messaging()
+      .send(message)
       .then((response) => {
         // Response is a message ID string.
-        console.log('Successfully sent message:', response);
-        res.send('Successfully sent message: ' + response);
+        console.log("Successfully sent message:", response);
+        res.send("Successfully sent message: " + response);
       })
       .catch((error) => {
-        console.log('Error sending message:', error);
-        res.send('Error sending message: ' + error);
+        console.log("Error sending message:", error);
+        res.send("Error sending message: " + error);
       });
   } catch (error) {
     next(error);
   }
 };
+
+export const readNotification: RequestHandler = async (req, res, next) => {
+  try {
+    const { userId, index } = req.body;
+    var user = await UserModel.findById(userId);
+    console.log(user);
+    if (!user) {
+      return res.sendStatus(400);
+    }
+
+    user.notifications[index].status = "seen";
+    const changed = await UserModel.findByIdAndUpdate(userId, user);
+    console.log(user.notifications);
+    return res.status(200).json(changed).end();
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getPaymentHistories: RequestHandler = async (req, res, next) => {
+  const url = req.url;
+  const [, params] = url.split("?");
+  const parsedParams = qs.parse(params);
+  const userId =
+    typeof parsedParams.userId === "string" ? parsedParams.userId : "";
+
+  try {
+    var user = await UserModel.findById(userId);
+
+    if (!user) {
+      return res.status(400);
+    }
+
+    res.status(200).json(user?.paymentHistories).end();
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const paySkycoin: RequestHandler = async (req, res, next) => {
+  try {
+    const { userId, coin, chapterId } = req.body;
+    var user = await UserModel.findById(userId);
+    console.log(user);
+    if (!user) {
+      return res.sendStatus(400);
+    }
+    if (user.coinPoint != undefined) {
+      user.coinPoint -= coin;
+    }
+    console.log(user.paymentHistories);
+    user.paymentHistories.push(new mongoose.Types.ObjectId(chapterId));
+    await user?.save();
+
+    const newPaymentHistory = await PaymentHistoryModel.create({
+      userId: userId,
+      orderDate: new Date(),
+      paymentMethod: "BuyComicChapter",
+      status: "completed",
+      price: coin,
+      packageId: chapterId,
+    });
+    console.log(newPaymentHistory);
+    return res.status(200).json(user.coinPoint).end();
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const uploadUsername: RequestHandler = async (req, res, next) => {
   try {
     const { userId, username } = req.body;
@@ -160,17 +252,46 @@ export const getBookmarkList: RequestHandler = async (req, res, next) => {
       },
       {
         $lookup: {
-          from: "comics",
+          from: "comicchapters",
           localField: "bookmarkList.comic",
           foreignField: "_id",
           pipeline: [
             {
               $lookup: {
-                from: "genres",
-                localField: "genres",
-                foreignField: "_id",
-                pipeline: [],
-                as: "genreNames",
+                from: "comics",
+                let: { chapterId: "$_id" },
+                localField: "_id",
+                foreignField: "chapterList",
+                pipeline: [
+                  {
+                    $addFields: {
+                      index: {
+                        $indexOfArray: [
+                          "$chapterList",
+                          { $toObjectId: "$$chapterId" },
+                        ],
+                      },
+                    },
+                  },
+                  {
+                    $lookup: {
+                      from: "genres",
+                      localField: "genres",
+                      foreignField: "_id",
+                      pipeline: [],
+                      as: "genreNames",
+                    },
+                  },
+                  {
+                    $lookup: {
+                      from: "comicchapters",
+                      localField: "chapterList",
+                      foreignField: "_id",
+                      as: "chapterListDetail",
+                    },
+                  },
+                ],
+                as: "owner",
               },
             },
           ],
@@ -179,17 +300,27 @@ export const getBookmarkList: RequestHandler = async (req, res, next) => {
       },
       {
         $lookup: {
-          from: "animes",
+          from: "animeepisodes",
           localField: "bookmarkList.movies",
           foreignField: "_id",
           pipeline: [
             {
               $lookup: {
-                from: "genres",
-                localField: "genres",
-                foreignField: "_id",
-                pipeline: [],
-                as: "genreNames",
+                from: "animes",
+                localField: "_id",
+                foreignField: "episodes",
+                pipeline: [
+                  {
+                    $lookup: {
+                      from: "genres",
+                      localField: "genres",
+                      foreignField: "_id",
+                      pipeline: [],
+                      as: "genreNames",
+                    },
+                  },
+                ],
+                as: "owner",
               },
             },
           ],

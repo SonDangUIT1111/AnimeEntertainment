@@ -9,15 +9,19 @@ class User {
   final Map<String, dynamic> bookmarkList;
   final Map<String, dynamic> histories;
   final List paymentHistories;
+  int notificationSentCount = 0;
   Map<String, dynamic> questLog;
+  List challenges;
   User(
       {required this.id,
       required this.username,
       required this.authentication,
       required this.avatar,
       required this.coinPoint,
+      required this.notificationSentCount,
       required this.bookmarkList,
       required this.histories,
       required this.paymentHistories,
-      required this.questLog});
+      required this.questLog,
+      required this.challenges});
 }
