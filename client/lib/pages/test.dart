@@ -8,14 +8,17 @@ import 'package:anime_and_comic_entertainment/components/ui/Button.dart';
 import 'package:anime_and_comic_entertainment/components/ui/DonateBannerHome.dart';
 import 'package:anime_and_comic_entertainment/components/ui/ReceivedCoinDialog.dart';
 import 'package:anime_and_comic_entertainment/pages/challenge/challenge_page.dart';
+import 'package:anime_and_comic_entertainment/pages/comic/comic_buy_chapter.dart';
 import 'package:anime_and_comic_entertainment/pages/comic/comic_chapter_comment.dart';
 import 'package:anime_and_comic_entertainment/pages/donate/donate_page.dart';
+import 'package:anime_and_comic_entertainment/pages/donate/donate_podium_page.dart';
 import 'package:anime_and_comic_entertainment/pages/profile/profile_page.dart';
 import 'package:anime_and_comic_entertainment/pages/search/search_page.dart';
 import 'package:anime_and_comic_entertainment/pages/search/search_result_page.dart';
 import 'package:anime_and_comic_entertainment/pages/payment.dart';
 import 'package:anime_and_comic_entertainment/pages/profile/bookmark_page.dart';
 import 'package:anime_and_comic_entertainment/pages/profile/edit_profile_page.dart';
+import 'package:anime_and_comic_entertainment/pages/notification/notification.dart';
 import 'package:anime_and_comic_entertainment/providers/user_provider.dart';
 import 'package:anime_and_comic_entertainment/components/ui/AlertDialog.dart';
 import 'package:anime_and_comic_entertainment/model/comics.dart';
@@ -75,18 +78,8 @@ class _TestPageState extends State<TestPage> {
               },
               child: const Text("test")),
           ElevatedButton(
-            onPressed: () async {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ComicChapterComment(
-                    sourceId: "65ec659f05c5cb2ad67cfb3d",
-                    type: "chapter",
-                  ),
-                ),
-              );
-            },
-            child: const Text("Comment"),
+            onPressed: () {},
+            child: const Text("Buy"),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -128,6 +121,8 @@ class _TestPageState extends State<TestPage> {
               showDialog(
                   context: context,
                   builder: (_) => CustomAlertChoiceDialog(
+                        yesContent: "Đăng xuất",
+                        noContent: "Bỏ qua",
                         content:
                             "Việc đăng xuất sẽ hạn chế một số tính năng của ứng dụng",
                         title: "Đăng xuất",
@@ -152,6 +147,26 @@ class _TestPageState extends State<TestPage> {
                 );
               },
               child: const Text("challenge page")),
+          ElevatedButton(
+              onPressed: () async {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const NotificationPage(),
+                  ),
+                );
+              },
+              child: const Text("notification page")),
+          ElevatedButton(
+              onPressed: () async {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ProfilePage(),
+                  ),
+                );
+              },
+              child: const Text("profile page")),
           ElevatedButton(
               onPressed: () async {
                 var result = await ChallengesApi.getChallengesQuestion(
@@ -201,52 +216,54 @@ class _TestPageState extends State<TestPage> {
                                   width: 10,
                                 ),
                                 Expanded(
-                                    child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "Konosuba",
-                                          style: TextStyle(
-                                              color: Utils.primaryColor,
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 18),
-                                        ),
-                                        const Text(
-                                          "Chương 24",
-                                          style: TextStyle(
-                                              color: Color(0xFFE9E9E9),
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w400),
-                                        )
-                                      ],
-                                    ),
-                                    Row(
-                                      children: [
-                                        const Text(
-                                          "30",
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w500),
-                                        ),
-                                        const SizedBox(
-                                          width: 10,
-                                        ),
-                                        Image.asset(
-                                          "assets/images/skycoin.png",
-                                          width: 16,
-                                          height: 16,
-                                        ),
-                                      ],
-                                    )
-                                  ],
-                                ))
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "Konosuba",
+                                            style: TextStyle(
+                                                color: Utils.primaryColor,
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 18),
+                                          ),
+                                          const Text(
+                                            "Chương 24",
+                                            style: TextStyle(
+                                                color: Color(0xFFE9E9E9),
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w400),
+                                          )
+                                        ],
+                                      ),
+                                      Row(
+                                        children: [
+                                          const Text(
+                                            "30",
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w500),
+                                          ),
+                                          const SizedBox(
+                                            width: 10,
+                                          ),
+                                          Image.asset(
+                                            "assets/images/skycoin.png",
+                                            width: 16,
+                                            height: 16,
+                                          ),
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -542,6 +559,16 @@ class _TestPageState extends State<TestPage> {
                 );
               },
               child: const Text("donate page")),
+          ElevatedButton(
+              onPressed: () async {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DonatePodium(),
+                  ),
+                );
+              },
+              child: const Text("bxh donate"))
         ]),
       );
     }));

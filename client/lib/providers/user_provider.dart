@@ -10,6 +10,7 @@ class UserProvider extends ChangeNotifier {
       histories: {},
       username: '',
       avatar: '',
+      notificationSentCount: 0,
       coinPoint: 0,
       questLog: {
         "readingTime": 0,
@@ -43,6 +44,16 @@ class UserProvider extends ChangeNotifier {
 
   void setCoinPoint(int coinPoint) {
     _user.coinPoint = coinPoint;
+    notifyListeners();
+  }
+
+  void minusCoinPoint(int coinPoint) {
+    _user.coinPoint -= coinPoint;
+    notifyListeners();
+  }
+
+  void setNotificationSentCount(int count) {
+    _user.notificationSentCount += count;
     notifyListeners();
   }
 

@@ -13,15 +13,9 @@ class ComicChapterProvider extends ChangeNotifier {
   ComicChapter get chapter => _chapter;
   bool get hadLiked => _hadLiked;
   bool get hadSaved => _hadSaved;
-  void setAnime(Comics item, ComicChapter item2) {
-    _comic = Comics();
-    _chapter = ComicChapter();
-    notifyListeners();
-    Future.delayed(const Duration(microseconds: 100), () {
-      _comic = item;
-      _chapter = item2;
-      notifyListeners(); // Prints after 1 second.
-    });
+  void setComic(Comics item, ComicChapter item2) {
+    _comic = item;
+    _chapter = item2;
   }
 
   Future<void> setLikeSave(String userId, BuildContext context) async {

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:anime_and_comic_entertainment/model/comics.dart';
 import 'package:anime_and_comic_entertainment/pages/auth/login.dart';
+import 'package:anime_and_comic_entertainment/pages/comic/comic_buy_chapter.dart';
 import 'package:anime_and_comic_entertainment/pages/comic/comic_chapter_comment.dart';
 import 'package:anime_and_comic_entertainment/providers/comic_detail_provider.dart';
 import 'package:anime_and_comic_entertainment/providers/navigator_provider.dart';
@@ -78,7 +79,7 @@ class _ComicChapterDetailState extends State<ComicChapterDetail> {
   Widget build(BuildContext context) {
     Comics comic = widget.comic;
     int chapterIndex = widget.index;
-    int contentLength = comic.chapterList![chapterIndex]['content'].length + 1;
+    int contentLength = comic.chapterList![chapterIndex]['content'].length;
 
     return Scaffold(
       backgroundColor: const Color(0xFF141414),
@@ -177,6 +178,117 @@ class _ComicChapterDetailState extends State<ComicChapterDetail> {
           })
         ],
       ),
+      bottomNavigationBar: Theme(
+        data: ThemeData.dark(),
+        child: Container(
+          color: const Color(0xFF2D2D2D),
+          height: 60,
+          child: BottomAppBar(
+            notchMargin: 8.0,
+            shape: const CircularNotchedRectangle(),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  onPressed: () {
+                    if (chapterIndex == 0) return;
+                    Navigator.of(context).pop(true);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ComicChapterDetail(
+                          comic: comic,
+                          index: chapterIndex - 1,
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Row(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
+                        child: FaIcon(
+                          FontAwesomeIcons.backwardStep,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      ),
+                      Text(
+                        "Trước",
+                        style: TextStyle(color: Colors.white, fontSize: 14),
+                      )
+                    ],
+                  ),
+                ),
+                GestureDetector(
+                  child: FaIcon(
+                    FontAwesomeIcons.solidMessage,
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ComicChapterComment(
+                          sourceId: widget.comic.chapterList![widget.index]
+                              ['_id'],
+                          type: 'chapter',
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                IconButton(
+                  onPressed: () {
+                    if (chapterIndex == comic.chapterList!.length - 1) return;
+                    if (comic.chapterList![chapterIndex + 1]['unlockPrice'] >
+                        0) {
+                      Navigator.of(context).push(
+                        PageRouteBuilder(
+                          opaque: false,
+                          pageBuilder: (BuildContext context, _, __) {
+                            return ComicBuyChapter(
+                              comic: comic,
+                              index: chapterIndex + 1,
+                            );
+                          },
+                        ),
+                      );
+                      return;
+                    }
+                    Navigator.of(context).pop(true);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ComicChapterDetail(
+                          comic: comic,
+                          index: chapterIndex + 1,
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Row(
+                    children: [
+                      Text(
+                        "Sau",
+                        style: TextStyle(color: Colors.white, fontSize: 14),
+                      ),
+                      Padding(
+                          padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                          child: FaIcon(
+                            FontAwesomeIcons.forwardStep,
+                            color: Colors.white,
+                            size: 16,
+                          ))
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
       body: Column(
         children: [
           LinearProgressIndicator(
@@ -184,111 +296,14 @@ class _ComicChapterDetailState extends State<ComicChapterDetail> {
             valueColor: AlwaysStoppedAnimation<Color>(Utils.primaryColor),
           ),
           SizedBox(
-            height: MediaQuery.of(context).size.height - 92,
+            height: MediaQuery.of(context).size.height - 183,
             child: ListView.builder(
               controller: _scrollController,
               itemCount: contentLength,
-              itemBuilder: (context, index) => index == contentLength - 1
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        ElevatedButton(
-                            onPressed: () {},
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent),
-                            child: IconButton(
-                                onPressed: () {
-                                  if (chapterIndex == 0) return;
-                                  Navigator.of(context).pop(true);
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ComicChapterDetail(
-                                        comic: comic,
-                                        index: chapterIndex - 1,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                icon: const Row(
-                                  children: [
-                                    Padding(
-                                        padding:
-                                            EdgeInsets.fromLTRB(0, 0, 10, 0),
-                                        child: FaIcon(
-                                          FontAwesomeIcons.backwardStep,
-                                          color: Colors.white,
-                                          size: 16,
-                                        )),
-                                    Text(
-                                      "Trước",
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 14),
-                                    )
-                                  ],
-                                ))),
-                        ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ComicChapterComment(
-                                    sourceId: widget.comic
-                                        .chapterList![widget.index]['_id'],
-                                    type: 'chapter',
-                                  ),
-                                ),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent),
-                            child: FaIcon(
-                              FontAwesomeIcons.solidMessage,
-                              color: Colors.white,
-                              size: 18,
-                            )),
-                        ElevatedButton(
-                            onPressed: () {},
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent),
-                            child: IconButton(
-                                onPressed: () {
-                                  if (chapterIndex ==
-                                      comic.chapterList!.length - 1) return;
-                                  Navigator.of(context).pop(true);
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            ComicChapterDetail(
-                                          comic: comic,
-                                          index: chapterIndex + 1,
-                                        ),
-                                      ));
-                                },
-                                icon: const Row(
-                                  children: [
-                                    Text(
-                                      "Sau",
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 14),
-                                    ),
-                                    Padding(
-                                        padding:
-                                            EdgeInsets.fromLTRB(10, 0, 0, 0),
-                                        child: FaIcon(
-                                          FontAwesomeIcons.forwardStep,
-                                          color: Colors.white,
-                                          size: 16,
-                                        ))
-                                  ],
-                                )))
-                      ],
-                    )
-                  : FadeInImage.assetNetwork(
-                      placeholder: 'assets/images/loadingcomicimage.png',
-                      image: comic.chapterList![chapterIndex]['content'][index],
-                    ),
+              itemBuilder: (context, index) => FadeInImage.assetNetwork(
+                placeholder: 'assets/images/loadingcomicimage.png',
+                image: comic.chapterList![chapterIndex]['content'][index],
+              ),
             ),
           ),
         ],

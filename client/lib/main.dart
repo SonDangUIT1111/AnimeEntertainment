@@ -14,6 +14,7 @@ import 'package:anime_and_comic_entertainment/pages/profile/edit_profile_page.da
 import 'package:anime_and_comic_entertainment/pages/profile/payment_history_page.dart';
 import 'package:anime_and_comic_entertainment/pages/profile/profile_page.dart';
 import 'package:anime_and_comic_entertainment/pages/test.dart';
+import 'package:anime_and_comic_entertainment/providers/comic_comment_provider.dart';
 import 'package:anime_and_comic_entertainment/providers/mini_player_controller_provider.dart';
 import 'package:anime_and_comic_entertainment/providers/navigator_provider.dart';
 import 'package:anime_and_comic_entertainment/providers/user_provider.dart';
@@ -50,20 +51,59 @@ void main() async {
     ChangeNotifierProvider(create: (context) => MiniPlayerControllerProvider()),
     ChangeNotifierProvider(create: (context) => NavigatorProvider()),
     ChangeNotifierProvider(create: (context) => ComicChapterProvider()),
+    ChangeNotifierProvider(create: (context) => ComicCommentProvider()),
   ], child: const MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
 
+class _MyAppState extends State<MyApp> {
   // This widget is the root of your application.
   @override
+  void initState() {
+    FirebaseApi().listenEvent(context);
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'skylark',
       color: Color(0xFF141414),
-      home: TestPage(),
+      //home: TestPage()
+      home: Splash(),
+    );
+  }
+}
+// set up navigation here --------------------------------------------------------------- //
+
+class NavigationScreen extends StatefulWidget {
+  final int navIndex;
+
+  NavigationScreen(this.navIndex) : super();
+
+  @override
+  _NavigationScreenState createState() => _NavigationScreenState();
+}
+
+class _NavigationScreenState extends State<NavigationScreen>
+    with TickerProviderStateMixin {
+  @override
+  void initState() {
+    super.initState();
+  }
+  // right here ...
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Color(0xFF141414),
+      //home: TestPage(),
     );
   }
 }
@@ -213,8 +253,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                 splashSpeedInMilliseconds: 0,
                 notchSmoothness: NotchSmoothness.defaultEdge,
                 gapLocation: GapLocation.none,
-                leftCornerRadius: 24,
-                rightCornerRadius: 24,
+                leftCornerRadius: 0,
+                rightCornerRadius: 0,
                 // onTap: (index) => setState(() => _bottomNavIndex = index),
                 onTap: (index) => {
                       if (Provider.of<MiniPlayerControllerProvider>(context,

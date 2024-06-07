@@ -309,13 +309,17 @@ class AnimesApi {
         var result = (jsonDecode(res.body));
         AnimeEpisodes episodeDetail = AnimeEpisodes(
             id: result[0]['_id'],
-            advertising: result[0]['advertisementContent'][0]['adVideoUrl'],
+            advertising: result[0]['advertisementContent'].length > 0
+                ? result[0]['advertisementContent'][0]['adVideoUrl']
+                : "",
             content: result[0]['content'],
             episodeName: result[0]['episodeName'],
             likes: result[0]['likes'],
             totalTime: result[0]['totalTime'],
             views: result[0]['views'],
-            adLink: result[0]['advertisementContent'][0]['forwardLink'],
+            adLink: result[0]['advertisementContent'].length > 0
+                ? result[0]['advertisementContent'][0]['forwardLink']
+                : "",
             comments: result[0]['comments']);
 
         return episodeDetail;
@@ -757,7 +761,7 @@ class AnimesApi {
         "userId": userId,
         "content": content
       };
-      await http.post(url, body: body);
+      await http.put(url, body: body);
     } catch (e) {
       print(Provider.of<NavigatorProvider>(context, listen: false)
           .isShowNetworkError);
@@ -783,7 +787,7 @@ class AnimesApi {
         "commentId": commentId,
         "userId": userId
       };
-      await http.post(url, body: body);
+      await http.put(url, body: body);
     } catch (e) {
       print(Provider.of<NavigatorProvider>(context, listen: false)
           .isShowNetworkError);
@@ -808,7 +812,7 @@ class AnimesApi {
         "userId": userId,
         "commentChildId": commentChildId
       };
-      await http.post(url, body: body);
+      await http.put(url, body: body);
     } catch (e) {
       print(Provider.of<NavigatorProvider>(context, listen: false)
           .isShowNetworkError);

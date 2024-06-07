@@ -3,11 +3,14 @@ import 'package:anime_and_comic_entertainment/components/comic/ComicBanner.dart'
 import 'package:anime_and_comic_entertainment/components/comic/NewChapterList.dart';
 import 'package:anime_and_comic_entertainment/components/comic/ReadingHistoresList.dart';
 import 'package:anime_and_comic_entertainment/components/ui/DonateBannerHome.dart';
+import 'package:anime_and_comic_entertainment/pages/donate/donate_page.dart';
+import 'package:anime_and_comic_entertainment/pages/notification/notification.dart';
 import 'package:anime_and_comic_entertainment/pages/search/search_page.dart';
 import 'package:anime_and_comic_entertainment/providers/navigator_provider.dart';
 import 'package:anime_and_comic_entertainment/providers/user_provider.dart';
 import 'package:anime_and_comic_entertainment/services/firebase_api.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:getwidget/components/appbar/gf_appbar.dart';
 import 'package:getwidget/components/button/gf_icon_button.dart';
 import 'package:getwidget/types/gf_button_type.dart';
@@ -40,6 +43,54 @@ class _ComicPageState extends State<ComicPage> {
                 color: Colors.white, fontSize: 28, fontWeight: FontWeight.w600),
           ),
           actions: <Widget>[
+            Provider.of<UserProvider>(context, listen: false)
+                        .user
+                        .authentication['sessionToken'] !=
+                    ""
+                ? Stack(
+                    alignment: AlignmentDirectional.center,
+                    children: [
+                      GFIconButton(
+                        icon: const Icon(
+                          Icons.notifications,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                        onPressed: () {
+                          Provider.of<NavigatorProvider>(context, listen: false)
+                              .setShow(false);
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => NotificationPage()));
+                        },
+                        type: GFButtonType.transparent,
+                      ),
+                      Positioned(
+                        right: 4,
+                        top: 4,
+                        child: Consumer(builder: (context, watch, _) {
+                          final user = Provider.of<UserProvider>(context).user;
+                          return user.authentication['sessionToken'] != ""
+                              ? user.notificationSentCount != 0
+                                  ? Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: const BoxDecoration(
+                                          color: Colors.red,
+                                          shape: BoxShape.circle),
+                                      child: Text(
+                                        user.notificationSentCount.toString(),
+                                        style: const TextStyle(
+                                            color: Colors.white, fontSize: 12),
+                                      ),
+                                    )
+                                  : const SizedBox.shrink()
+                              : const SizedBox.shrink();
+                        }),
+                      ),
+                    ],
+                  )
+                : const SizedBox.shrink(),
             GFIconButton(
               icon: const Icon(Icons.search, color: Colors.white, size: 24),
               onPressed: () {
@@ -99,10 +150,18 @@ class _ComicPageState extends State<ComicPage> {
               child: SizedBox(height: 256, child: NewChapterList()),
             ),
             // Top unlock...
-            const Padding(
-              padding: EdgeInsets.fromLTRB(10, 5, 10, 10),
-              child: DonateBannerHome(
-                urlAsset: 'assets/images/donate1.png',
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const DonatePage()));
+              },
+              child: const Padding(
+                padding: EdgeInsets.fromLTRB(10, 5, 10, 10),
+                child: DonateBannerHome(
+                  urlAsset: 'assets/images/donate1.png',
+                ),
               ),
             ),
             const Padding(

@@ -1,24 +1,52 @@
+import 'package:anime_and_comic_entertainment/components/ui/AlertDialog.dart';
+import 'package:anime_and_comic_entertainment/components/ui/AlertYesNoDialog.dart';
 import 'package:anime_and_comic_entertainment/model/comics.dart';
+import 'package:anime_and_comic_entertainment/model/comicchapters.dart';
+import 'package:anime_and_comic_entertainment/pages/auth/login.dart';
+import 'package:anime_and_comic_entertainment/pages/comic/comic_buy_chapter.dart';
 import 'package:anime_and_comic_entertainment/pages/comic/comic_chapter_detail.dart';
+import 'package:anime_and_comic_entertainment/providers/comic_detail_provider.dart';
 import 'package:anime_and_comic_entertainment/providers/navigator_provider.dart';
+import 'package:anime_and_comic_entertainment/providers/user_provider.dart';
+import 'package:anime_and_comic_entertainment/services/user_api.dart';
 import 'package:anime_and_comic_entertainment/utils/utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:getwidget/colors/gf_color.dart';
+import 'package:getwidget/components/toast/gf_toast.dart';
+import 'package:getwidget/position/gf_toast_position.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 
-class ComicChapter extends StatefulWidget {
+class ComicChapterComponent extends StatefulWidget {
   final int index;
   final Comics comic;
 
-  const ComicChapter({super.key, required this.index, required this.comic});
+  const ComicChapterComponent(
+      {super.key, required this.index, required this.comic});
 
   @override
-  State<ComicChapter> createState() => _ComicChapterState();
+  State<ComicChapterComponent> createState() => _ComicChapterComponentState();
 }
 
-class _ComicChapterState extends State<ComicChapter> {
+class _ComicChapterComponentState extends State<ComicChapterComponent> {
+  Future<List<dynamic>> getPayHis() async {
+    var result = await UsersApi.getPaymentHistories(context);
+    return result;
+  }
+
+  bool bought = false;
+
+  @override
+  initState() {
+    super.initState();
+    getPayHis().then((value) => setState(() {
+          bought =
+              value.contains(widget.comic.chapterList![widget.index]['_id']);
+        }));
+  }
+
   @override
   Widget build(BuildContext context) {
     Comics comic = widget.comic;
@@ -28,17 +56,34 @@ class _ComicChapterState extends State<ComicChapter> {
     String publishTime = dateFormat.format(date);
 
     return GestureDetector(
-      onTap: () {
-        Provider.of<NavigatorProvider>(context, listen: false).setShow(false);
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ComicChapterDetail(
-              comic: comic,
-              index: widget.index,
+      onTap: () async {
+        if (comic.chapterList![widget.index]['unlockPrice'] > 0) {
+          Navigator.of(context).push(
+            PageRouteBuilder(
+              opaque: false,
+              pageBuilder: (BuildContext context, _, __) {
+                return ComicBuyChapter(
+                  comic: comic,
+                  index: widget.index,
+                );
+              },
             ),
-          ),
-        );
+          );
+        } else {
+          Provider.of<ComicChapterProvider>(context, listen: false).setComic(
+              Comics(id: comic.id),
+              ComicChapter(id: comic.chapterList![widget.index]['_id']));
+          Provider.of<NavigatorProvider>(context, listen: false).setShow(false);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ComicChapterDetail(
+                comic: comic,
+                index: widget.index,
+              ),
+            ),
+          );
+        }
       },
       child: SizedBox(
         height: 80,
@@ -100,7 +145,7 @@ class _ComicChapterState extends State<ComicChapter> {
                     ],
                   ),
                 ),
-                comic.chapterList![widget.index]['unlockPrice'] > 0
+                comic.chapterList![widget.index]['unlockPrice'] > 0 && !bought
                     ? Container(
                         height: 40,
                         width: 100,
@@ -129,21 +174,37 @@ class _ComicChapterState extends State<ComicChapter> {
                             ),
                           ],
                         ))
-                    : Container(
-                        height: 40,
-                        width: 100,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(6),
-                            color: Colors.transparent),
-                        child: Text(
-                          "Miễn phí",
-                          style: TextStyle(
-                              fontSize: 14,
-                              color: Utils.primaryColor,
-                              fontWeight: FontWeight.w500),
-                        ),
-                      ),
+                    : comic.chapterList![widget.index]['unlockPrice'] == 0
+                        ? Container(
+                            height: 40,
+                            width: 100,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(6),
+                                color: Colors.transparent),
+                            child: Text(
+                              "Miễn phí",
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  color: Utils.primaryColor,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                          )
+                        : Container(
+                            height: 40,
+                            width: 100,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(6),
+                                color: Colors.transparent),
+                            child: const Text(
+                              "Đã mua",
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                          ),
               ],
             ),
             const SizedBox(
