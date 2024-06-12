@@ -36,7 +36,7 @@ import 'package:anime_and_comic_entertainment/pages/challenge/challenge_test_pag
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  Stripe.publishableKey = StripeApiKey.publishableKey;
+  // Stripe.publishableKey = StripeApiKey.publishableKey;
   await Stripe.instance.applySettings();
   await Firebase.initializeApp(
       options: const FirebaseOptions(

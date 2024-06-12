@@ -602,7 +602,7 @@ export const updateUserHistoryHadSeenEpisode: RequestHandler = async (
     if (!mongoose.isValidObjectId(userId)) {
       throw createHttpError(400, "Invalid user id");
     }
-    const userInfo = await UserModel.findById(userId);
+    const userInfo = await UserModel.findById(userId).select("histories");
     var check = userInfo?.histories?.watchingMovie.find(
       (item) => item.episodeId.toString() === episodeId
     );
@@ -622,7 +622,6 @@ export const updateUserHistoryHadSeenEpisode: RequestHandler = async (
       }
       await UserModel.findByIdAndUpdate(userId, userInfo!);
     }
-
     res.status(200).json(userInfo);
   } catch (error) {
     next(error);
@@ -650,11 +649,8 @@ export const getWatchingHistories: RequestHandler = async (req, res, next) => {
         $match: { _id: new mongoose.Types.ObjectId(userId) },
       },
       {
-        $project: {
-          histories: 1,
-        },
+        $project: { histories: 1 },
       },
-      { $sort: { "histories.watchingMovie.position": 1 } },
       {
         $lookup: {
           from: "animeepisodes",
