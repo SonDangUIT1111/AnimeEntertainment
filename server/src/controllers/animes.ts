@@ -403,6 +403,29 @@ export const getAnimeEpisodeDetailById: RequestHandler = async (
   }
 };
 
+export const getAnimeOfEpisode: RequestHandler = async (req, res, next) => {
+  const url = req.url;
+  const [, params] = url.split("?");
+  const parsedParams = qs.parse(params);
+  const episodeId =
+    typeof parsedParams.episodeId === "string" ? parsedParams.episodeId : "";
+  try {
+    if (!mongoose.isValidObjectId(episodeId)) {
+      throw createHttpError(400, "Invalid episode id");
+    }
+    const owner = await AnimesModel.find({
+      episodes: new mongoose.Types.ObjectId(episodeId),
+    });
+
+    if (!owner) {
+      throw createHttpError(404, "episode not found");
+    }
+    res.status(200).json(owner);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getAnimeDetailInEpisodePageById: RequestHandler = async (
   req,
   res,

@@ -26,7 +26,6 @@ import 'package:anime_and_comic_entertainment/utils/apiKey.dart';
 import 'package:anime_and_comic_entertainment/utils/utils.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:auto_size_text/auto_size_text.dart';
@@ -36,8 +35,6 @@ import 'package:anime_and_comic_entertainment/pages/challenge/challenge_test_pag
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Stripe.publishableKey = StripeApiKey.publishableKey;
-  await Stripe.instance.applySettings();
   await Firebase.initializeApp(
       options: const FirebaseOptions(
           apiKey: 'AIzaSyDtoKADEsE3QxNeflKMKcyRIOqzG3eScsA',

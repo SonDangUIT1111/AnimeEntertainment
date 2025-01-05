@@ -356,6 +356,29 @@ export const getDetailComicById: RequestHandler = async (req, res, next) => {
   }
 };
 
+export const getComicOfChapter: RequestHandler = async (req, res, next) => {
+  const url = req.url;
+  const [, params] = url.split("?");
+  const parsedParams = qs.parse(params);
+  const chapterId =
+    typeof parsedParams.chapterId === "string" ? parsedParams.chapterId : "";
+  try {
+    if (!mongoose.isValidObjectId(chapterId)) {
+      throw createHttpError(400, "Invalid chapter id");
+    }
+    const owner = await ComicsModel.find({
+      chapterList: new mongoose.Types.ObjectId(chapterId),
+    });
+
+    if (!owner) {
+      throw createHttpError(404, "chapter not found");
+    }
+    res.status(200).json(owner);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getComicChapter: RequestHandler = async (req, res, next) => {
   const url = req.url;
   const [, params] = url.split("?");

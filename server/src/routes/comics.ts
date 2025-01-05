@@ -18,6 +18,8 @@ router.get("/getRankingTable", ComicsController.getRankingTable);
 
 router.get("/getDetailComicById", ComicsController.getDetailComicById);
 
+router.get("/getComicOfChapter", ComicsController.getComicOfChapter);
+
 router.post("/updateUserSaveChapter", ComicsController.updateUserSaveChapter);
 
 router.get(

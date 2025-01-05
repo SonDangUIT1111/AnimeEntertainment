@@ -18,9 +18,10 @@ class NotificationPage extends StatefulWidget {
 }
 
 class _NotificationPageState extends State<NotificationPage> {
-  late String userId = '65ec67ad05c5cb2ad67cfb3f';
+  late String userId = '';
   late List<Notifications> notifications = [];
   Future<List<Notifications>> getNotification() async {
+    userId = Provider.of<UserProvider>(context, listen: false).user.id;
     if (userId.isEmpty) return [];
     var result = await NotificationApi.getNotification(context, userId);
     return result;

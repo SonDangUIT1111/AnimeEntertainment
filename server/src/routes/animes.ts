@@ -24,6 +24,8 @@ router.get(
   AnimeController.getAnimeEpisodeDetailById
 );
 
+router.get("/getAnimeOfEpisode", AnimeController.getAnimeOfEpisode);
+
 router.get(
   "/getAnimeDetailInEpisodePageById",
   AnimeController.getAnimeDetailInEpisodePageById
